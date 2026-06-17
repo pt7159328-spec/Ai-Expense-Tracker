@@ -12,7 +12,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import CORS
 from bson import ObjectId
-from flask import request, jsoinfy, send_file, render_template
+from flask import send_file, render_template
 from bson.objectid import ObjectId
 from fpdf import FPDF
 import os
