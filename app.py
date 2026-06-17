@@ -46,6 +46,50 @@ jwt = JWTManager(app)
 def home():
     return render_template("index.html")
 
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/login-page")
+def login_page():
+    return render_template("login.html")
+
+@app.route("/register-page")
+def register_page():
+    return render_template("register.html")
+
+@app.route("/dashboard-page")
+def dashboard_page():
+    return render_template("dashboard.html")
+
+@app.route("/expenses-page")
+def expenses_page():
+    return render_template("expenses.html")
+
+@app.route("/add-expense-page")
+def add_expense_page():
+    return render_template("add-expense.html")
+
+@app.route("/summary-page")
+def summary_page():
+    return render_template("summary.html")
+
+@app.route("/budget-page")
+def budget_page():
+    return render_template("budget.html")
+
+@app.route("/ai-page")
+def ai_page():
+    return render_template("ai.html")
+
+@app.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacy-policy.html")
+
+@app.route("/terms-and-conditions")
+def terms_and_conditions():
+    return render_template("terms-and-conditions.html")
+
 
 # 🔐 REGISTER API
 @app.route("/register", methods=["POST"])
