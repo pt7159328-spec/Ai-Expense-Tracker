@@ -1,3 +1,4 @@
+from flask import render_template
 from dotenv import load_dotenv
 load_dotenv()
 from flasgger import Swagger
@@ -11,7 +12,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import CORS
 from bson import ObjectId
-from flask import request, jsonify, send_file
+from flask import request, jsoinfy, send_file, render_template
 from bson.objectid import ObjectId
 from fpdf import FPDF
 import os
@@ -44,7 +45,8 @@ jwt = JWTManager(app)
 
 @app.route("/")
 def home():
-    return {"message": "API Running"}
+    return 
+render_template("index.html")
 
 
 # 🔐 REGISTER API
