@@ -1,4 +1,3 @@
-from flask import render_template
 from dotenv import load_dotenv
 load_dotenv()
 from flasgger import Swagger
@@ -45,8 +44,7 @@ jwt = JWTManager(app)
 
 @app.route("/")
 def home():
-    return 
-render_template("index.html")
+    return render_template("index.html")
 
 
 # 🔐 REGISTER API
