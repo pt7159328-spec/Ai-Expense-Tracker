@@ -1,0 +1,139 @@
+body {
+    margin: 0;
+    font-family: Arial;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    background: #007bff;
+    color: white;
+    padding: 15px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left img {
+    width: 35px;
+    margin-right: 10px;
+}
+
+.back-btn {
+    color: white;
+    text-decoration: none;
+    background: rgba(255,255,255,0.2);
+    padding: 6px 12px;
+    border-radius: 5px;
+}
+
+/* CONTAINER */
+.container {
+    padding: 20px;
+}
+
+/* NO DATA */
+.no-data {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.no-data h3 {
+    color: #007bff;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+
+th {
+    background: #007bff;
+    color: white;
+}
+
+/* ACTION BUTTONS */
+.action-btn {
+    padding: 5px 10px;
+    margin: 2px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.edit {
+    background: orange;
+    color: white;
+}
+
+.delete {
+    background: red;
+    color: white;
+}
+
+/* FILTER SECTION */
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: end;
+    background: #f5f7fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 180px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-buttons .btn {
+    border: none;
+    cursor: pointer;
+    margin-top: 0;
+}
+
+.pdf-btn {
+    background: #28a745;
+}

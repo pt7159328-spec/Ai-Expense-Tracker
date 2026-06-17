@@ -1,0 +1,125 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #007bff;
+    color: white;
+    padding: 15px 20px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left img {
+    width: 35px;
+    margin-right: 10px;
+}
+
+.back-btn {
+    color: white;
+    text-decoration: none;
+    background: rgba(255,255,255,0.2);
+    padding: 6px 12px;
+    border-radius: 5px;
+}
+
+/* MAIN */
+.container {
+    padding: 30px;
+    text-align: center;
+}
+
+/* TITLE */
+.title p {
+    color: #555;
+}
+
+/* CARD */
+.budget-card {
+    background: white;
+    padding: 30px;
+    margin: 30px auto;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.budget-card input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* BUTTONS */
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.buttons button {
+    flex: 1;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.buttons .delete {
+    background: red;
+}
+
+/* ALERT */
+.alert-box {
+    background: white;
+    padding: 25px;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* FOOTER */
+.footer {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+}
+
+.status-grid {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.status-card {
+    background: #f5f7fa;
+    padding: 15px;
+    border-radius: 10px;
+    width: 120px;
+    text-align: center;
+}
+
+.status-card h2 {
+    margin-top: 5px;
+}
+
+.alert-text {
+    margin-top: 15px;
+    font-weight: bold;
+}

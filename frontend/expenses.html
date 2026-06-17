@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expenses</title>
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/expenses.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-left">
+        <img src="images/logo.png">
+        <h2>AI Expense Tracker</h2>
+    </div>
+
+    <div class="header-right">
+        <a href="dashboard.html" class="back-btn">← Dashboard</a>
+    </div>
+</header>
+
+<div class="container">
+
+    <h2>📋 Your Expenses</h2>
+
+  <!-- FILTER + PDF SECTION -->
+<div class="filter-section">
+
+    <div class="filter-group">
+        <label>From Date</label>
+        <input type="date" id="fromDate">
+    </div>
+
+    <div class="filter-group">
+        <label>To Date</label>
+        <input type="date" id="toDate">
+    </div>
+
+    <div class="filter-group">
+        <label>Category</label>
+        <select id="categoryFilter">
+            <option value="">All Categories</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Currency</label>
+        <select id="currencyFilter">
+            <option value="">All Currencies</option>
+            <option value="INR">INR (₹)</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="AED">AED (د.إ)</option>
+        </select>
+    </div>
+
+    <div class="filter-buttons">
+        <button id="filterBtn" class="btn">🔍 Filter</button>
+        <button id="pdfBtn" class="btn pdf-btn">📄 Download PDF</button>
+    </div>
+
+</div>
+
+    <!-- NO DATA MESSAGE -->
+    <div id="noData" class="no-data" style="display:none;">
+        <h3>🚀 No Expenses Yet</h3>
+        <p>You haven’t added any expenses today.</p>
+        <p>Start tracking your spending and take control of your money.</p>
+        <a href="add-expense.html" class="btn">➕ Add Your First Expense</a>
+    </div>
+
+    <!-- TABLE -->
+    <table id="expenseTableWrapper">
+        <thead>
+            <tr>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="expenseTable"></tbody>
+    </table>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <h3>AI Expense Tracker</h3>
+    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
+
+    <div class="contact">
+        <p>📞 +91 9011621636</p>
+        <p>📧 mrpk49227@gmail.com</p>
+        <p>📨 prakash.work@zohomail.in</p>
+    </div>
+     <a href="privacy-policy.html">Privacy Policy</a>
+
+    <a href="terms-and-conditions.html">
+    Terms & Conditions
+    </a>
+
+    <p class="copy">© 2026 AI Expense Tracker</p>
+</footer>
+
+<script src="js/expenses.js"></script>
+</body>
+</html>

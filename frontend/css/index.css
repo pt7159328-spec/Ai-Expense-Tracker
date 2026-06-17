@@ -1,0 +1,126 @@
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+    background: linear-gradient(to right, #007bff, #00c6ff);
+    color: white;
+}
+
+.section {
+    padding: 50px;
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.card {
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+
+/* AI POWERED INSIGHTS SECTION */
+.ai-insights{
+    background:#ffffff;
+    padding:35px;
+    margin-top:40px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+.ai-insights h2{
+    color:#007bff;
+    font-size:30px;
+    margin-bottom:20px;
+}
+
+.ai-insights p{
+    color:#555;
+    font-size:17px;
+    line-height:1.9;
+    max-width:900px;
+    margin:auto;
+}
+
+.cta {
+    text-align: center;
+    padding: 50px;
+    background: #007bff;
+    color: white;
+}
+
+/* HOW TO USE SECTION */
+.how-to-use{
+    background:#ffffff;
+    padding:35px;
+    margin-top:40px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+.how-to-use h2{
+    color:#007bff;
+    font-size:30px;
+    margin-bottom:20px;
+}
+
+.how-to-use p{
+    color:#555;
+    font-size:17px;
+    line-height:1.9;
+    max-width:900px;
+    margin:auto;
+}
+
+/* SMART EXPENSE SECTION */
+.how-to-use{
+    background:#ffffff;
+    padding:35px;
+    margin-top:40px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+.how-to-use h2{
+    color:#007bff;
+    font-size:30px;
+    margin-bottom:20px;
+}
+
+.how-to-use p{
+    color:#555;
+    font-size:17px;
+    line-height:1.9;
+    max-width:900px;
+    margin:auto;
+}
+
+/* BENEFITS SECTION */
+.benefits-section{
+    background:#ffffff;
+    padding:35px;
+    margin-top:40px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+.benefits-section h2{
+    color:#007bff;
+    font-size:30px;
+    margin-bottom:20px;
+}
+
+.benefits-section p{
+    color:#555;
+    font-size:17px;
+    line-height:1.9;
+    max-width:900px;
+    margin:auto;
+}

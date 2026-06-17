@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Management</title>
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/budget.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-left">
+        <img src="images/logo.png">
+        <h2>AI Expense Tracker</h2>
+    </div>
+
+    <div class="header-right">
+        <a href="dashboard.html" class="back-btn">← Dashboard</a>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+    <div class="title">
+        <h1>💸 Budget Management</h1>
+        <p>Set your monthly budget and track your spending smartly</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="budget-card">
+        <input type="month" id="month">
+        <input type="number" id="amount" placeholder="Enter Budget Amount">
+
+        <div class="buttons">
+            <button onclick="setBudget()">Set Budget</button>
+            <button class="delete" onclick="deleteBudget()">Delete</button>
+        </div>
+    </div>
+
+    <!-- ALERT BOX -->
+    <div class="alert-box" id="alertBox">
+
+    <h3>📊 Budget Status</h3>
+
+    <div class="status-grid">
+        <div class="status-card">
+            <p>Total Spent</p>
+            <h2 id="spent">₹0</h2>
+        </div>
+
+        <div class="status-card">
+            <p>Budget Limit</p>
+            <h2 id="budget">₹0</h2>
+        </div>
+
+        <div class="status-card">
+            <p>Remaining</p>
+            <h2 id="remaining">₹0</h2>
+        </div>
+    </div>
+
+    <p id="alert" class="alert-text">No data</p>
+
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <h3>AI Expense Tracker</h3>
+    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
+
+    <div class="contact">
+        <p>📞 +91 9011621636</p>
+        <p>📧 mrpk49227@gmail.com</p>
+        <p>📨 prakash.work@zohomail.in</p>
+    </div>
+     <a href="privacy-policy.html">Privacy Policy</a>
+
+    <a href="terms-and-conditions.html">
+    Terms & Conditions
+    </a>
+
+    <p class="copy">© 2026 AI Expense Tracker</p>
+</footer>
+
+<script src="js/budget.js"></script>
+</body>
+</html>
