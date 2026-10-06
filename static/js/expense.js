@@ -15,7 +15,7 @@ document.getElementById("expenseForm").addEventListener("submit", async function
     }
 
     try {
-        const response = await fetch("http:///add-expense", {
+        const response = await fetch("/add-expense", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

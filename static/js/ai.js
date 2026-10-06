@@ -9,7 +9,7 @@ async function loadAI() {
     }
 
     try {
-        const response = await fetch("http:///ai-spending-analysis", {
+        const response = await fetch("/ai-spending-analysis", {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + token

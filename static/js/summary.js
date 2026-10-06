@@ -13,7 +13,7 @@ async function loadSummary() {
     const endDate = document.getElementById("endDate").value;
     const category = document.getElementById("category").value;
 
-    let url = "http:///expense-summary";
+    let url = "/expense-summary";
 
     // BUILD QUERY PARAMS
     const params = [];

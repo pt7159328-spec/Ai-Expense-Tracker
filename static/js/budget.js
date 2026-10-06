@@ -11,7 +11,7 @@ async function setBudget() {
     }
 
     try {
-        const res = await fetch("http:///set-budget", {
+        const res = await fetch("/set-budget", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -42,7 +42,7 @@ async function getAlert() {
     if (!month) return;
 
     try {
-        const res = await fetch(`http:///budget-alert/${month}`, {
+        const res = await fetch(`/budget-alert/${month}`, {
             headers: {
                 "Authorization": "Bearer " + token
             }
@@ -79,7 +79,7 @@ async function deleteBudget() {
     }
 
     try {
-        const res = await fetch(`http:///delete-budget/${month}`, {
+        const res = await fetch(`/delete-budget/${month}`, {
             method: "DELETE",
             headers: {
                 "Authorization": "Bearer " + token
