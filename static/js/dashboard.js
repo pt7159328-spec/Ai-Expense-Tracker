@@ -44,7 +44,7 @@ if (name) {
 async function loadDashboardData() {
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/expense-summary", {
+        const response = await fetch("http:///expense-summary", {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + token

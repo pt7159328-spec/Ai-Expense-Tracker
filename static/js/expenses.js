@@ -26,7 +26,7 @@ async function loadExpenses() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/expenses", {
+        const response = await fetch("http:///expenses", {
             headers: {
                 "Authorization": "Bearer " + token
             }
@@ -89,7 +89,7 @@ async function deleteExpense(id) {
 
     try {
 
-        const response = await fetch(`http://127.0.0.1:5000/delete-expense/${id}`, {
+        const response = await fetch(`http:///delete-expense/${id}`, {
             method: "DELETE",
             headers: {
                 "Authorization": "Bearer " + token
@@ -127,7 +127,7 @@ async function editExpense(id, category, amount, date) {
 
     try {
 
-        const response = await fetch(`http://127.0.0.1:5000/update-expense/${id}`, {
+        const response = await fetch(`http:///update-expense/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -167,7 +167,7 @@ async function loadCategories() {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5000/user-categories", {
+        const response = await fetch("http:///user-categories", {
             headers: {
                 "Authorization": "Bearer " + token
             }
@@ -202,7 +202,7 @@ async function filterExpenses() {
     const category = document.getElementById("categoryFilter").value;
     const currency = document.getElementById("currencyFilter").value;
 
-    let url = `http://127.0.0.1:5000/filter-expenses?`;
+    let url = `http:///filter-expenses?`;
 
     if (fromDate && toDate) {
         url += `from_date=${fromDate}&to_date=${toDate}&`;
@@ -278,7 +278,7 @@ function downloadPDF() {
     const toDate = document.getElementById("toDate").value;
     const category = document.getElementById("categoryFilter").value;
 
-    let url = `http://127.0.0.1:5000/report-pdf?`;
+    let url = `http:///report-pdf?`;
 
     if (fromDate && toDate) {
         url += `from_date=${fromDate}&to_date=${toDate}&`;
