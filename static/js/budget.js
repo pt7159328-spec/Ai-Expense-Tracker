@@ -104,3 +104,17 @@ async function deleteBudget() {
 
 // AUTO LOAD WHEN MONTH CHANGES
 document.getElementById("month").addEventListener("change", getAlert);
+// AUTO LOAD BUDGET WHEN PAGE OPENS
+window.addEventListener("DOMContentLoaded", function () {
+    const monthInput = document.getElementById("month");
+
+    if (!monthInput.value) {
+        const now = new Date();
+        const month = now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, "0");
+
+        monthInput.value = month;
+    }
+
+    getAlert();
+});

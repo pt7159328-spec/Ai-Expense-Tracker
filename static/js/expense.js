@@ -10,7 +10,7 @@ document.getElementById("expenseForm").addEventListener("submit", async function
 
     if (!token) {
         alert("Please login first");
-        window.location.href = "login.html";
+        window.location.href = "/login-page";
         return;
     }
 
@@ -33,7 +33,7 @@ document.getElementById("expenseForm").addEventListener("submit", async function
         if (response.status === 401) {
             alert("Session expired. Please login again.");
             localStorage.clear();
-            window.location.href = "login.html";
+            window.location.href = "/login-page";
             return;
         }
 

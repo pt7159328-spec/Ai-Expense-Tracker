@@ -1,78 +1,108 @@
 // ================= REGISTER =================
-document.getElementById("registerForm")?.addEventListener("submit", async function(e) {
+
+document.getElementById("registerForm")?.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
+    if (!name || !email || !password) {
+        alert("Please fill all fields.");
+        return;
+    }
+
     try {
-        const response = await fetch("http://127.0.0.1:5000/register", {
+        const response = await fetch("/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password
+            })
         });
 
         const result = await response.json();
 
         if (response.ok) {
-            alert("✅ Registration successful!");
 
-            // 🔐 Save user data
-            localStorage.setItem("username", name);
+            // Save authentication token
+            if (result.access_token) {
+                localStorage.setItem("token", result.access_token);
+            }
+
+            // Save user information
+            localStorage.setItem("name", result.name || name);
+            localStorage.setItem("username", result.name || name);
             localStorage.setItem("userEmail", email);
 
-            // 👉 Redirect
-            window.location.href = "dashboard.html";
+            alert("✅ Registration successful!");
+
+            // Go to dashboard through Flask
+            window.location.href = "/dashboard-page";
 
         } else {
-            alert("❌ " + result.msg);
+            alert("❌ " + (result.msg || "Registration failed."));
         }
 
     } catch (error) {
-        alert("Server error!");
-        console.error(error);
+        console.error("Registration error:", error);
+        alert("❌ Server error! Please try again.");
     }
 });
 
 
 // ================= LOGIN =================
-document.getElementById("loginForm")?.addEventListener("submit", async function(e) {
+
+document.getElementById("loginForm")?.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const email = document.getElementById("loginEmail").value;
+    const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
 
+    if (!email || !password) {
+        alert("Please enter email and password.");
+        return;
+    }
+
     try {
-        const response = await fetch("http://127.0.0.1:5000/login", {
+        const response = await fetch("/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
         });
 
         const result = await response.json();
 
         if (response.ok) {
-            alert("✅ Login successful!");
 
-            // 🔐 Save token + REAL USER NAME
+            // Save JWT token
             localStorage.setItem("token", result.access_token);
-            localStorage.setItem("name", result.name);   // 🔥 FIX
+
+            // Save user information
+            localStorage.setItem("name", result.name || "");
+            localStorage.setItem("username", result.name || "");
             localStorage.setItem("userEmail", email);
 
-            // 👉 Redirect
-            window.location.href = "dashboard.html";
+            alert("✅ Login successful!");
+
+            // Go to dashboard through Flask
+            window.location.href = "/dashboard-page";
 
         } else {
-            alert("❌ " + result.msg);
+            alert("❌ " + (result.msg || "Invalid credentials."));
         }
 
     } catch (error) {
-        alert("Server error!");
-        console.error(error);
+        console.error("Login error:", error);
+        alert("❌ Server error! Please try again.");
     }
 });

@@ -28,7 +28,7 @@ const token = localStorage.getItem("token");
 
 if (!token) {
     alert("Please login first");
-    window.location.href = "login.html";
+    window.location.href = "/login-page";
 }
 
 // 👤 USER NAME SHOW (FIXED)
@@ -55,7 +55,7 @@ async function loadDashboardData() {
         if (response.status === 401) {
             alert("Session expired. Please login again.");
             localStorage.clear();
-            window.location.href = "login.html";
+            window.location.href = "/login-page";
             return;
         }
 
@@ -88,5 +88,5 @@ loadDashboardData();
 // 🚪 LOGOUT
 function logout() {
     localStorage.clear();
-    window.location.href = "index.html";
+    window.location.href = "/";
 }

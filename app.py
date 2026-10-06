@@ -58,54 +58,91 @@ def register_page():
 def dashboard_page():
     return render_template("dashboard.html")
 
+# Frontend page routes
+# These aliases allow the existing .html links used by the frontend to work
+# when the application is served through Flask.
+@app.route("/login.html")
+def login_html():
+    return render_template("login.html")
+
+@app.route("/register.html")
+def register_html():
+    return render_template("register.html")
+
+@app.route("/dashboard.html")
+def dashboard_html():
+    return render_template("dashboard.html")
+
+@app.route("/add-expense.html")
+def add_expense_page():
+    return render_template("add-expense.html")
+
+@app.route("/expenses.html")
+def expenses_page():
+    return render_template("expenses.html")
+
+@app.route("/summary.html")
+def summary_page():
+    return render_template("summary.html")
+
+@app.route("/ai.html")
+def ai_page():
+    return render_template("ai.html")
+
+@app.route("/budget.html")
+def budget_page():
+    return render_template("budget.html")
+
+@app.route("/privacy-policy.html")
+def privacy_policy_page():
+    return render_template("privacy-policy.html")
+
+@app.route("/terms-and-conditions.html")
+def terms_page():
+    return render_template("terms-and-conditions.html")
 
 
-# 🔐 REGISTER API
 @app.route("/register", methods=["POST"])
 def register():
-    """
-    Register User
-    ---
-    tags:
-      - Authentication
-    parameters:
-      - in: body
-        name: body
-        schema:
-          type: object
-          required:
-            - name
-            - email
-            - password
-          properties:
-            name:
-              type: string
-            email:
-              type: string
-            password:
-              type: string
-    responses:
-      200:
-        description: User registered
-    """
-    data = request.json
+    data = request.json or {}
 
     name = data.get("name")
     email = data.get("email")
     password = data.get("password")
 
-    if mongo.db.users.find_one({"email": email}):
-        return jsonify({"msg": "User already exists"}), 400
+    if not name or not email or not password:
+        return jsonify({
+            "msg": "Name, email and password are required"
+        }), 400
 
-    hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+    existing_user = mongo.db.users.find_one({
+        "email": email
+    })
 
-    mongo.db.users.insert_one({
+    if existing_user:
+        return jsonify({
+            "msg": "User already exists"
+        }), 400
+
+    hashed_password = bcrypt.generate_password_hash(
+        password
+    ).decode("utf-8")
+
+    result = mongo.db.users.insert_one({
         "name": name,
         "email": email,
         "password": hashed_password
     })
 
-    return jsonify({"msg": "User registered successfully"})
+    token = create_access_token(
+        identity=str(result.inserted_id)
+    )
+
+    return jsonify({
+        "msg": "User registered successfully",
+        "access_token": token,
+        "name": name
+    }), 201
 
 
 # 🔐 LOGIN API
@@ -604,22 +641,20 @@ def user_categories():
 
     return jsonify(categories)
 
-
-# ================================
-# PROFESSIONAL PDF REPORT
-# ================================
 @app.route("/report-pdf", methods=["GET"])
 @jwt_required()
 def report_pdf():
 
     user_id = get_jwt_identity()
 
-    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
-    
+    user = mongo.db.users.find_one({
+        "_id": ObjectId(user_id)
+    })
+
     user_name = "User"
 
     if user:
-      user_name = user.get("name", "User")
+        user_name = user.get("name", "User")
 
     from_date = request.args.get("from_date")
     to_date = request.args.get("to_date")
@@ -640,32 +675,69 @@ def report_pdf():
     if category:
         query["category"] = category
 
-    expenses = list(mongo.db.expenses.find(query))
+    expenses = list(
+        mongo.db.expenses.find(query)
+    )
 
-    # PDF CREATE
+    # ================================
+    # CREATE PDF
+    # ================================
     pdf = FPDF()
     pdf.add_page()
 
     # ================================
     # LOGO
     # ================================
-    pdf.image("frontend/images/logo.png", 10, 8, 20)
+    logo_path = os.path.join(
+        app.root_path,
+        "static",
+        "images",
+        "logo.png"
+    )
+
+    if os.path.exists(logo_path):
+        pdf.image(
+            logo_path,
+            10,
+            8,
+            20
+        )
+
     # ================================
     # TITLE
     # ================================
     pdf.set_font("Arial", "B", 20)
     pdf.set_text_color(0, 102, 204)
 
-    pdf.cell(200, 15, txt="AI Expense Tracker", ln=True, align="C")
+    pdf.cell(
+        200,
+        15,
+        txt="AI Expense Tracker",
+        ln=True,
+        align="C"
+    )
+
     pdf.set_font("Arial", "", 12)
     pdf.set_text_color(80, 80, 80)
 
-    pdf.cell(200, 8, txt=f"Prepared For: {user_name}", ln=True, align="C")
+    pdf.cell(
+        200,
+        8,
+        txt=f"Prepared For: {user_name}",
+        ln=True,
+        align="C"
+    )
 
     pdf.set_font("Arial", "", 14)
     pdf.set_text_color(0, 0, 0)
 
-    pdf.cell(200, 10, txt="Expense Report", ln=True, align="C")
+    pdf.cell(
+        200,
+        10,
+        txt="Expense Report",
+        ln=True,
+        align="C"
+    )
 
     pdf.ln(10)
 
@@ -675,10 +747,20 @@ def report_pdf():
     pdf.set_font("Arial", "B", 12)
 
     if from_date and to_date:
-        pdf.cell(200, 8, txt=f"Date: {from_date} to {to_date}", ln=True)
+        pdf.cell(
+            200,
+            8,
+            txt=f"Date: {from_date} to {to_date}",
+            ln=True
+        )
 
     if category:
-        pdf.cell(200, 8, txt=f"Category: {category}", ln=True)
+        pdf.cell(
+            200,
+            8,
+            txt=f"Category: {category}",
+            ln=True
+        )
 
     pdf.ln(5)
 
@@ -706,28 +788,74 @@ def report_pdf():
 
     for exp in expenses:
 
-        amount = float(exp.get("amount", 0))
-        category_name = exp.get("category", "")
-        date = exp.get("date", "")
+        amount = float(
+            exp.get("amount", 0)
+        )
+
+        category_name = exp.get(
+            "category",
+            ""
+        )
+
+        date = exp.get(
+            "date",
+            ""
+        )
 
         total += amount
 
-        pdf.cell(20, 10, str(count), 1, 0, "C")
-        pdf.cell(60, 10, category_name, 1, 0, "C")
-        pdf.cell(50, 10, f"Rs. {amount}", 1, 0, "C")
-        pdf.cell(50, 10, date, 1, 1, "C")
+        pdf.cell(
+            20,
+            10,
+            str(count),
+            1,
+            0,
+            "C"
+        )
+
+        pdf.cell(
+            60,
+            10,
+            category_name,
+            1,
+            0,
+            "C"
+        )
+
+        pdf.cell(
+            50,
+            10,
+            f"Rs. {amount}",
+            1,
+            0,
+            "C"
+        )
+
+        pdf.cell(
+            50,
+            10,
+            date,
+            1,
+            1,
+            "C"
+        )
 
         count += 1
 
     pdf.ln(10)
 
     # ================================
-    # TOTAL BOX
+    # TOTAL
     # ================================
     pdf.set_font("Arial", "B", 14)
     pdf.set_text_color(0, 102, 204)
 
-    pdf.cell(200, 10, txt=f"Total Expense: Rs. {total}", ln=True)
+    pdf.cell(
+        200,
+        10,
+        txt=f"Total Expense: Rs. {total}",
+        ln=True
+    )
 
     pdf.ln(15)
 
@@ -748,14 +876,18 @@ def report_pdf():
     # ================================
     # SAVE PDF
     # ================================
-    file_path = "expense_report.pdf"
+    file_path = os.path.join(
+        app.root_path,
+        "expense_report.pdf"
+    )
 
     pdf.output(file_path)
 
     return send_file(
         file_path,
         as_attachment=True,
-        download_name="expense_report.pdf"
+        download_name="expense_report.pdf",
+        mimetype="application/pdf"
     )
 
 if __name__ == "__main__":

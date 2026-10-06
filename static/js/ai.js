@@ -4,7 +4,7 @@ async function loadAI() {
 
     if (!token) {
         alert("Please login first");
-        window.location.href = "login.html";
+        window.location.href = "/login-page";
         return;
     }
 
