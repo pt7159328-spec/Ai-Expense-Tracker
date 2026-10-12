@@ -3,93 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary</title>
+
+    <title>Expense Summary | AI Expense Tracker</title>
 
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/summary.css">
 </head>
-<body>
 
-<!-- HEADER -->
-<header class="header">
-    <div class="header-left">
-        <img src="/static/images/logo.png">
-        <h2>AI Expense Tracker</h2>
-    </div>
+<body class="summary-page">
 
-    <div class="header-right">
-        <a href="/dashboard-page" class="back-btn">← Dashboard</a>
-    </div>
-</header>
+    <!-- HEADER -->
+    <header class="summary-header">
+        <a href="/dashboard-page" class="summary-brand">
+            <img src="/static/images/logo.png" alt="AI Expense Tracker logo">
 
-<!-- MAIN -->
-<div class="container">
+            <span class="summary-brand-text">
+                <strong>AI Expense Tracker</strong>
+                <small>Smart money management</small>
+            </span>
+        </a>
 
-    <!-- TITLE -->
-    <div class="title">
-        <h1>📊 Expense Summary</h1>
-        <p>Analyze your spending with smart filters and insights</p>
-    </div>
+        <a href="/dashboard-page" class="summary-back">
+            <span aria-hidden="true">←</span> Dashboard
+        </a>
+    </header>
 
-    <!-- FILTER SECTION -->
-    <div class="filters">
-        <input type="date" id="startDate">
-        <input type="date" id="endDate">
-        <input type="text" id="category" placeholder="Category (Food, Travel...)">
-        <button onclick="loadSummary()">Apply Filter</button>
-    </div>
 
-    <!-- SUMMARY CARDS -->
-    <div class="summary-cards">
+    <main class="summary-main">
 
-        <div class="card">
-            <h3>💰 Total Expense</h3>
-            <span id="total">0</span>
+        <!-- PAGE INTRO -->
+        <section class="summary-hero">
+            <div class="summary-hero-copy">
+                <span class="summary-eyebrow">
+                    <span class="summary-status-dot"></span>
+                    FINANCIAL OVERVIEW
+                </span>
+
+                <h1>Expense <span>Summary</span></h1>
+
+                <p>
+                    Understand your spending at a glance.
+                    Review your totals and discover where your money goes.
+                </p>
+            </div>
+
+            <div class="summary-hero-art" aria-hidden="true">
+                <div class="hero-orbit orbit-one"></div>
+                <div class="hero-orbit orbit-two"></div>
+                <div class="hero-chart-symbol">↗</div>
+                <span class="hero-star star-one">✦</span>
+                <span class="hero-star star-two">✧</span>
+            </div>
+        </section>
+
+
+        <!-- FILTER PANEL -->
+        <section class="summary-filter-panel">
+
+            <div class="summary-section-heading">
+                <div>
+                    <span class="summary-kicker">CUSTOMIZE YOUR VIEW</span>
+                    <h2>Filter Summary</h2>
+                    <p>Select a date range or category to narrow your results.</p>
+                </div>
+
+                <span class="summary-filter-label">
+                    <span aria-hidden="true">⌕</span> Smart Filters
+                </span>
+            </div>
+
+            <div class="summary-filter-grid">
+
+                <div class="summary-field">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="summary-field">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+
+                <div class="summary-field">
+                    <label for="category">Expense Category</label>
+                    <input
+                        type="text"
+                        id="category"
+                        placeholder="e.g. Food, Travel"
+                        autocomplete="off"
+                    >
+                </div>
+
+            </div>
+
+            <div class="summary-filter-footer">
+                <p>
+                    <span class="summary-info-icon">ⓘ</span>
+                    Leave a field empty if you do not want to filter by it.
+                </p>
+
+                <div class="summary-filter-actions">
+                    <button
+                        type="button"
+                        class="summary-reset-btn"
+                        onclick="resetSummaryFilters()"
+                    >
+                        Reset
+                    </button>
+
+                    <button
+                        type="button"
+                        class="summary-apply-btn"
+                        onclick="loadSummary()"
+                    >
+                        <span aria-hidden="true">⌕</span>
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- SUMMARY METRICS -->
+        <section class="summary-metrics-section">
+
+            <div class="summary-section-heading metrics-heading">
+                <div>
+                    <span class="summary-kicker">YOUR NUMBERS</span>
+                    <h2>Spending Overview</h2>
+                    <p>Your expense statistics based on the selected filters.</p>
+                </div>
+
+                <span class="summary-live-label">
+                    <span class="summary-status-dot"></span>
+                    Account Summary
+                </span>
+            </div>
+
+
+            <div class="summary-metrics-grid">
+
+                <!-- TOTAL EXPENSE -->
+                <article class="summary-metric-card total-card">
+                    <div class="summary-metric-top">
+                        <span class="summary-metric-icon">₹</span>
+                        <span class="summary-metric-tag">TOTAL</span>
+                    </div>
+
+                    <p class="summary-metric-label">Total Expense</p>
+                    <h3 id="total" class="summary-metric-value">0</h3>
+
+                    <p class="summary-metric-caption">
+                        Combined recorded expenses
+                    </p>
+
+                    <div class="summary-card-accent"></div>
+                </article>
+
+
+                <!-- TRANSACTIONS -->
+                <article class="summary-metric-card transactions-card">
+                    <div class="summary-metric-top">
+                        <span class="summary-metric-icon">▤</span>
+                        <span class="summary-metric-tag">ACTIVITY</span>
+                    </div>
+
+                    <p class="summary-metric-label">Transactions</p>
+                    <h3 id="count" class="summary-metric-value">0</h3>
+
+                    <p class="summary-metric-caption">
+                        Total recorded transactions
+                    </p>
+
+                    <div class="summary-card-accent"></div>
+                </article>
+
+
+                <!-- AVERAGE -->
+                <article class="summary-metric-card average-card">
+                    <div class="summary-metric-top">
+                        <span class="summary-metric-icon">∑</span>
+                        <span class="summary-metric-tag">AVERAGE</span>
+                    </div>
+
+                    <p class="summary-metric-label">Average Expense</p>
+                    <h3 id="avg" class="summary-metric-value">0</h3>
+
+                    <p class="summary-metric-caption">
+                        Average amount per transaction
+                    </p>
+
+                    <div class="summary-card-accent"></div>
+                </article>
+
+
+                <!-- HIGHEST -->
+                <article class="summary-metric-card highest-card">
+                    <div class="summary-metric-top">
+                        <span class="summary-metric-icon">↗</span>
+                        <span class="summary-metric-tag">MAXIMUM</span>
+                    </div>
+
+                    <p class="summary-metric-label">Highest Expense</p>
+                    <h3 id="high" class="summary-metric-value">0</h3>
+
+                    <p class="summary-metric-caption">
+                        Largest recorded expense
+                    </p>
+
+                    <div class="summary-card-accent"></div>
+                </article>
+
+
+                <!-- LOWEST -->
+                <article class="summary-metric-card lowest-card">
+                    <div class="summary-metric-top">
+                        <span class="summary-metric-icon">↘</span>
+                        <span class="summary-metric-tag">MINIMUM</span>
+                    </div>
+
+                    <p class="summary-metric-label">Lowest Expense</p>
+                    <h3 id="low" class="summary-metric-value">0</h3>
+
+                    <p class="summary-metric-caption">
+                        Smallest recorded expense
+                    </p>
+
+                    <div class="summary-card-accent"></div>
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- HELPFUL TIP -->
+        <section class="summary-insight">
+            <div class="summary-insight-icon">✦</div>
+
+            <div class="summary-insight-content">
+                <span class="summary-kicker">SMART MONEY HABIT</span>
+                <h3>Make your spending more meaningful.</h3>
+                <p>
+                    Check your summary regularly, identify expensive habits
+                    and set realistic savings goals for the future.
+                </p>
+            </div>
+
+            <a href="/expenses.html" class="summary-insight-link">
+                View Expenses <span aria-hidden="true">→</span>
+            </a>
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="summary-footer">
+        <div class="summary-footer-main">
+            <a href="/dashboard-page" class="summary-footer-brand">
+                <img src="/static/images/logo.png" alt="">
+                <strong>AI Expense Tracker</strong>
+            </a>
+
+            <p>
+                Track smarter. Spend mindfully. Build better financial habits.
+            </p>
         </div>
 
-        <div class="card">
-            <h3>📊 Transactions</h3>
-            <span id="count">0</span>
+        <div class="summary-footer-bottom">
+            <span>© 2026 AI Expense Tracker</span>
+
+            <div>
+                <a href="/privacy-policy.html">Privacy Policy</a>
+                <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+            </div>
         </div>
+    </footer>
 
-        <div class="card">
-            <h3>📉 Average</h3>
-            <span id="avg">0</span>
-        </div>
 
-        <div class="card">
-            <h3>🔺 Highest</h3>
-            <span id="high">0</span>
-        </div>
+    <!-- KEEP EXISTING SUMMARY LOGIC -->
+    <script src="/static/js/summary.js"></script>
 
-        <div class="card">
-            <h3>🔻 Lowest</h3>
-            <span id="low">0</span>
-        </div>
+    <!-- RESET FILTERS -->
+    <script>
+        function resetSummaryFilters() {
+            document.getElementById("startDate").value = "";
+            document.getElementById("endDate").value = "";
+            document.getElementById("category").value = "";
 
-    </div>
+            loadSummary();
+        }
+    </script>
 
-</div>
-
-<!-- FOOTER -->
-<footer class="footer">
-    <h3>AI Expense Tracker</h3>
-    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
-
-    <div class="contact">
-        <p>📞 +91 9011621636</p>
-        <p>📧 mrpk49227@gmail.com</p>
-        <p>📨 prakash.work@zohomail.in</p>
-    </div>
-     <a href="privacy-policy.html">Privacy Policy</a>
-
-    <a href="terms-and-conditions.html">
-    Terms & Conditions
-    </a>
-
-    <p class="copy">© 2026 AI Expense Tracker</p>
-</footer>
-
-<script src="/static/js/summary.js"></script>
 </body>
 </html>

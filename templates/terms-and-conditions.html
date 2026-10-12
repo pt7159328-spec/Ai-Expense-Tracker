@@ -3,155 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms & Conditions</title>
+
+    <meta name="description"
+          content="Terms and Conditions for using AI Expense Tracker.">
+
+    <title>Terms &amp; Conditions | AI Expense Tracker</title>
 
     <link rel="stylesheet" href="/static/css/common.css">
-
-    <style>
-
-        body{
-            margin:0;
-            font-family:Arial;
-            background:#f5f7fa;
-        }
-
-        .header{
-            background:#007bff;
-            color:white;
-            padding:15px 20px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        }
-
-        .header a{
-            color:white;
-            text-decoration:none;
-            background:rgba(255,255,255,0.2);
-            padding:8px 14px;
-            border-radius:6px;
-        }
-
-        .container{
-            max-width:1000px;
-            margin:30px auto;
-            background:white;
-            padding:30px;
-            border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h1{
-            color:#007bff;
-            margin-bottom:20px;
-        }
-
-        h2{
-            color:#333;
-            margin-top:25px;
-        }
-
-        p{
-            color:#555;
-            line-height:1.8;
-        }
-
-        ul{
-            color:#555;
-            line-height:1.8;
-        }
-
-        .footer{
-            margin-top:40px;
-            background:#007bff;
-            color:white;
-            text-align:center;
-            padding:20px;
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="/static/css/terms-and-conditions.css">
 </head>
-<body>
+
+<body class="terms-page">
+
+<div class="terms-app">
 
     <!-- HEADER -->
-    <header class="header">
-        <h2>AI Expense Tracker</h2>
+    <header class="terms-header">
+        <a href="/dashboard-page" class="terms-brand">
+            <span class="brand-icon">₹</span>
+            <span>
+                <strong>AI Expense Tracker</strong>
+                <small>Smart money management</small>
+            </span>
+        </a>
 
-        <a href="/dashboard-page">← Back to Dashboard</a>
+        <nav class="terms-nav">
+            <a href="/dashboard-page">Dashboard</a>
+            <a href="/expenses.html">Expenses</a>
+            <a href="/summary.html">Summary</a>
+            <a href="/ai.html">AI Analysis</a>
+        </nav>
+
+        <a href="/dashboard-page" class="terms-back">
+            ← Dashboard
+        </a>
     </header>
 
-    <!-- CONTENT -->
-    <div class="container">
+    <!-- MAIN -->
+    <main class="terms-main">
 
-        <h1>Terms & Conditions</h1>
+        <section class="terms-hero">
+            <div class="terms-hero-content">
+                <span class="terms-eyebrow">PLEASE READ CAREFULLY</span>
 
-        <p>
-            Welcome to AI Expense Tracker. By using this website, you agree to follow the terms and conditions mentioned below.
-        </p>
+                <h1>Terms &amp; <span>Conditions</span></h1>
 
-        <h2>1. Use of the Website</h2>
+                <p>
+                    These terms explain the basic rules and responsibilities
+                    for using AI Expense Tracker. Please review them before
+                    using the application.
+                </p>
 
-        <p>
-            AI Expense Tracker is created for personal expense tracking and financial management purposes only.
-        </p>
+                <div class="terms-meta">
+                    <span>⚖️</span>
+                    <span>Usage rules · User responsibilities · Service information</span>
+                </div>
+            </div>
 
-        <h2>2. User Responsibility</h2>
+            <div class="terms-hero-art" aria-hidden="true">
+                <div class="terms-document">
+                    <span class="document-check">✓</span>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                </div>
+            </div>
+        </section>
 
-        <ul>
-            <li>You are responsible for the data you enter.</li>
-            <li>Please provide accurate information.</li>
-            <li>Do not misuse the platform.</li>
-        </ul>
+        <div class="terms-layout">
 
-        <h2>3. Account Security</h2>
+            <!-- TABLE OF CONTENTS -->
+            <aside class="terms-sidebar">
+                <h2>Quick Navigation</h2>
 
-        <p>
-            Users are responsible for keeping their login credentials secure and confidential.
-        </p>
+                <a href="#website-use">01. Use of Website</a>
+                <a href="#responsibilities">02. User Responsibility</a>
+                <a href="#account-security">03. Account Security</a>
+                <a href="#data-usage">04. Data Usage</a>
+                <a href="#ai-insights">05. AI Insights</a>
+                <a href="#restricted-activities">06. Restricted Activities</a>
+                <a href="#service-changes">07. Service Changes</a>
+                <a href="#liability">08. Limitation of Liability</a>
+                <a href="#contact">09. Contact</a>
 
-        <h2>4. Data Usage</h2>
+                <div class="terms-sidebar-note">
+                    <span>ℹ️</span>
+                    <p>
+                        By continuing to use the application, you acknowledge
+                        these terms, subject to applicable law.
+                    </p>
+                </div>
+            </aside>
 
-        <p>
-            Your expense data is used only to provide expense tracking and reporting features.
-        </p>
+            <!-- TERMS CONTENT -->
+            <article class="terms-content">
 
-        <h2>5. Restricted Activities</h2>
+                <section class="terms-intro">
+                    <span class="terms-section-label">WELCOME</span>
+                    <h2>Welcome to AI Expense Tracker</h2>
 
-        <ul>
-            <li>No illegal activity is allowed.</li>
-            <li>No attempt to damage or hack the system.</li>
-            <li>No fake or harmful content.</li>
-        </ul>
+                    <p>
+                        AI Expense Tracker is designed to help users record
+                        expenses, review spending summaries, manage budgets
+                        and explore spending insights. These terms describe
+                        the expected use of the service and your responsibilities
+                        when using it.
+                    </p>
+                </section>
 
-        <h2>6. Service Changes</h2>
+                <section class="terms-section" id="website-use">
+                    <div class="terms-number">01</div>
 
-        <p>
-            We may update features, modify services, or improve the platform anytime without prior notice.
-        </p>
+                    <div class="terms-section-body">
+                        <h2>Use of the Website</h2>
 
-        <h2>7. Limitation of Liability</h2>
+                        <p>
+                            AI Expense Tracker is intended for personal expense
+                            tracking, budgeting and financial record-keeping.
+                            You agree to use the application lawfully and in
+                            accordance with these terms.
+                        </p>
 
-        <p>
-            AI Expense Tracker is provided for educational and financial tracking purposes. We are not responsible for financial decisions made using this platform.
-        </p>
+                        <ul>
+                            <li>Use the available features for their intended purpose.</li>
+                            <li>Do not interfere with the normal operation of the website.</li>
+                            <li>Use the service in accordance with applicable laws.</li>
+                        </ul>
+                    </div>
+                </section>
 
-        <h2>8. Contact</h2>
+                <section class="terms-section" id="responsibilities">
+                    <div class="terms-number">02</div>
 
-        <p>
-            📧 Email: mrpk49227@gmail.com
-        </p>
+                    <div class="terms-section-body">
+                        <h2>User Responsibility</h2>
 
-        <p>
-            📞 Phone: +91 9011621636
-        </p>
+                        <p>
+                            You are responsible for the information you enter
+                            into the application and for reviewing your records
+                            for accuracy.
+                        </p>
 
-    </div>
+                        <ul>
+                            <li>Enter accurate expense amounts, categories and dates.</li>
+                            <li>Review your records before relying on reports or totals.</li>
+                            <li>Do not enter information that you are not authorized to use.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="account-security">
+                    <div class="terms-number">03</div>
+
+                    <div class="terms-section-body">
+                        <h2>Account Security</h2>
+
+                        <p>
+                            If you create an account, you are responsible for
+                            keeping your login credentials confidential and
+                            for taking reasonable steps to protect access to
+                            your account.
+                        </p>
+
+                        <ul>
+                            <li>Do not share your password or login credentials.</li>
+                            <li>Sign out when using a shared device.</li>
+                            <li>Report suspected unauthorized access using the available contact details.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="data-usage">
+                    <div class="terms-number">04</div>
+
+                    <div class="terms-section-body">
+                        <h2>Data Usage</h2>
+
+                        <p>
+                            Expense and account information may be processed
+                            to provide the application's features, such as
+                            expense records, summaries, budget calculations
+                            and spending reports.
+                        </p>
+
+                        <p>
+                            Please also read our
+                            <a href="/privacy-policy.html" class="inline-link">
+                                Privacy Policy
+                            </a>
+                            for information about data handling and privacy.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="ai-insights">
+                    <div class="terms-number">05</div>
+
+                    <div class="terms-section-body">
+                        <h2>AI Insights &amp; Financial Information</h2>
+
+                        <p>
+                            Spending insights, alerts, suggestions and
+                            projections are intended to help you understand
+                            your recorded expenses. They may be based on
+                            available records or automated calculations.
+                        </p>
+
+                        <div class="terms-info-box">
+                            <span>💡</span>
+                            <p>
+                                These insights are informational only. They
+                                are not professional financial, investment,
+                                tax or legal advice. Review your own situation
+                                before making financial decisions.
+                            </p>
+                        </div>
+
+                        <p>
+                            Results may be incomplete or inaccurate if your
+                            records are missing, incorrect or out of date.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="restricted-activities">
+                    <div class="terms-number">06</div>
+
+                    <div class="terms-section-body">
+                        <h2>Restricted Activities</h2>
+
+                        <p>You must not use the application to:</p>
+
+                        <ul>
+                            <li>Conduct illegal or fraudulent activities.</li>
+                            <li>Attempt unauthorized access to accounts, systems or data.</li>
+                            <li>Disrupt, damage or interfere with the website or its services.</li>
+                            <li>Upload malicious code or misuse the application's features.</li>
+                            <li>Access or use another person's information without permission.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="service-changes">
+                    <div class="terms-number">07</div>
+
+                    <div class="terms-section-body">
+                        <h2>Service Changes &amp; Availability</h2>
+
+                        <p>
+                            Features, functionality and availability may
+                            change as the application is maintained or
+                            improved. The service may occasionally be
+                            unavailable because of maintenance, technical
+                            problems or hosting issues.
+                        </p>
+
+                        <p>
+                            Keep your own records of important financial
+                            information. Do not rely on this application as
+                            the only copy of essential financial records.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="liability">
+                    <div class="terms-number">08</div>
+
+                    <div class="terms-section-body">
+                        <h2>Limitation of Liability</h2>
+
+                        <p>
+                            The application is provided as an expense-tracking
+                            and budgeting aid. To the extent permitted by
+                            applicable law, the service does not guarantee
+                            uninterrupted availability or that all reports,
+                            calculations or insights will always be accurate.
+                        </p>
+
+                        <p>
+                            You remain responsible for reviewing your records
+                            and making your own financial decisions. Nothing
+                            in these terms excludes rights or protections
+                            that cannot legally be excluded.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="terms-section" id="contact">
+                    <div class="terms-number">09</div>
+
+                    <div class="terms-section-body">
+                        <h2>Contact Information</h2>
+
+                        <p>
+                            For questions about these Terms &amp; Conditions,
+                            you can use the contact details below. Confirm
+                            these details are correct and monitored before
+                            publishing the website.
+                        </p>
+
+                        <div class="terms-contact-grid">
+                            <a href="mailto:mrpk49227@gmail.com"
+                               class="terms-contact-card">
+                                <span class="contact-icon">✉</span>
+                                <span>
+                                    <small>Email</small>
+                                    <strong>mrpk49227@gmail.com</strong>
+                                </span>
+                            </a>
+
+                            <a href="tel:+919011621636"
+                               class="terms-contact-card">
+                                <span class="contact-icon">☎</span>
+                                <span>
+                                    <small>Phone</small>
+                                    <strong>+91 9011621636</strong>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="terms-final-note">
+                    <span>✓</span>
+                    <p>
+                        Thank you for using AI Expense Tracker. Please use
+                        the application responsibly and review these terms
+                        whenever they are updated.
+                    </p>
+                </div>
+
+            </article>
+        </div>
+
+    </main>
 
     <!-- FOOTER -->
-    <footer class="footer">
-        <p>© 2026 AI Expense Tracker. All Rights Reserved.</p>
+    <footer class="terms-footer">
+        <div class="footer-brand">
+            <strong>AI Expense Tracker</strong>
+            <p>Track smarter. Plan better.</p>
+        </div>
+
+        <div class="footer-links">
+            <a href="/privacy-policy.html">Privacy Policy</a>
+            <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+            <a href="/dashboard-page">Dashboard</a>
+        </div>
+
+        <p class="copyright">
+            © 2026 AI Expense Tracker. All Rights Reserved.
+        </p>
     </footer>
+
+</div>
 
 </body>
 </html>

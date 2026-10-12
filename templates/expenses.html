@@ -2,109 +2,268 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Expenses</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Expenses | AI Expense Tracker</title>
 
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/expenses.css">
 </head>
-<body>
 
-<header class="header">
-    <div class="header-left">
-        <img src="/static/images/logo.png">
-        <h2>AI Expense Tracker</h2>
-    </div>
+<body class="expenses-page">
 
-    <div class="header-right">
-        <a href="/dashboard-page" class="back-btn">← Dashboard</a>
-    </div>
-</header>
+    <!-- NAVBAR -->
+    <header class="expenses-header">
+        <a href="/dashboard-page" class="brand">
+            <span class="brand-icon">₹</span>
 
-<div class="container">
+            <span class="brand-text">
+                <strong>AI Expense Tracker</strong>
+                <small>Smart money management</small>
+            </span>
+        </a>
 
-    <h2>📋 Your Expenses</h2>
+        <nav class="header-actions">
+            <a href="/dashboard-page" class="nav-link">
+                <span>←</span> Dashboard
+            </a>
 
-  <!-- FILTER + PDF SECTION -->
-<div class="filter-section">
+            <a href="/add-expense.html" class="add-expense-btn">
+                <span>＋</span> Add Expense
+            </a>
+        </nav>
+    </header>
 
-    <div class="filter-group">
-        <label>From Date</label>
-        <input type="date" id="fromDate">
-    </div>
 
-    <div class="filter-group">
-        <label>To Date</label>
-        <input type="date" id="toDate">
-    </div>
+    <main class="expenses-main">
 
-    <div class="filter-group">
-        <label>Category</label>
-        <select id="categoryFilter">
-            <option value="">All Categories</option>
-        </select>
-    </div>
+        <!-- PAGE INTRO -->
+        <section class="page-intro">
+            <div class="intro-copy">
+                <span class="eyebrow">
+                    <span class="status-dot"></span>
+                    YOUR FINANCIAL ACTIVITY
+                </span>
 
-    <div class="filter-group">
-        <label>Currency</label>
-        <select id="currencyFilter">
-            <option value="">All Currencies</option>
-            <option value="INR">INR (₹)</option>
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="AED">AED (د.إ)</option>
-        </select>
-    </div>
+                <h1>My <span>Expenses</span></h1>
 
-    <div class="filter-buttons">
-        <button id="filterBtn" class="btn">🔍 Filter</button>
-        <button id="pdfBtn" class="btn pdf-btn">📄 Download PDF</button>
-    </div>
+                <p>
+                    Track your spending, manage transactions and
+                    download your expense reports in one place.
+                </p>
+            </div>
 
-</div>
+            <a href="/add-expense.html" class="primary-btn">
+                <span>＋</span> Add New Expense
+            </a>
+        </section>
 
-    <!-- NO DATA MESSAGE -->
-    <div id="noData" class="no-data" style="display:none;">
-        <h3>🚀 No Expenses Yet</h3>
-        <p>You haven’t added any expenses today.</p>
-        <p>Start tracking your spending and take control of your money.</p>
-        <a href="add-expense.html" class="btn">➕ Add Your First Expense</a>
-    </div>
 
-    <!-- TABLE -->
-    <table id="expenseTableWrapper">
-        <thead>
-            <tr>
-                <th>Amount</th>
-                <th>Category</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="expenseTable"></tbody>
-    </table>
+        <!-- QUICK INFO CARDS -->
+        <section class="info-grid">
 
-</div>
+            <article class="info-card">
+                <div class="info-icon purple-icon">▤</div>
+                <div>
+                    <p>Transaction History</p>
+                    <h3>All in one place</h3>
+                    <span>Review your recorded expenses</span>
+                </div>
+            </article>
 
-<!-- FOOTER -->
-<footer class="footer">
-    <h3>AI Expense Tracker</h3>
-    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
+            <article class="info-card">
+                <div class="info-icon teal-icon">⌕</div>
+                <div>
+                    <p>Smart Filters</p>
+                    <h3>Find expenses faster</h3>
+                    <span>Filter by date, category and currency</span>
+                </div>
+            </article>
 
-    <div class="contact">
-        <p>📞 +91 9011621636</p>
-        <p>📧 mrpk49227@gmail.com</p>
-        <p>📨 prakash.work@zohomail.in</p>
-    </div>
-     <a href="privacy-policy.html">Privacy Policy</a>
+            <article class="info-card">
+                <div class="info-icon blue-icon">↗</div>
+                <div>
+                    <p>Expense Reports</p>
+                    <h3>Export to PDF</h3>
+                    <span>Keep a copy of your spending report</span>
+                </div>
+            </article>
 
-    <a href="terms-and-conditions.html">
-    Terms & Conditions
-    </a>
+        </section>
 
-    <p class="copy">© 2026 AI Expense Tracker</p>
-</footer>
 
-<script src="/static/js/expenses.js"></script>
+        <!-- FILTER PANEL -->
+        <section class="filter-panel">
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">TRANSACTION CONTROL</span>
+                    <h2>Filter Expenses</h2>
+                    <p>Choose your preferred filters below.</p>
+                </div>
+
+                <span class="filter-badge">Advanced Filters</span>
+            </div>
+
+            <div class="filter-grid">
+
+                <div class="filter-group">
+                    <label for="fromDate">From Date</label>
+                    <input type="date" id="fromDate">
+                </div>
+
+                <div class="filter-group">
+                    <label for="toDate">To Date</label>
+                    <input type="date" id="toDate">
+                </div>
+
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="currencyFilter">Currency</label>
+                    <select id="currencyFilter">
+                        <option value="">All Currencies</option>
+                        <option value="INR">INR (₹)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="AED">AED (د.إ)</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="filter-footer">
+                <p>
+                    <span class="hint-icon">ⓘ</span>
+                    Apply filters to find specific transactions.
+                </p>
+
+                <div class="filter-buttons">
+                    <button type="button" id="filterBtn" class="filter-btn">
+                        <span>⌕</span> Apply Filters
+                    </button>
+
+                    <button type="button" id="pdfBtn" class="pdf-btn">
+                        <span>⇩</span> Download PDF
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- TRANSACTION TABLE -->
+        <section class="transactions-panel">
+
+            <div class="section-heading transactions-heading">
+                <div>
+                    <span class="section-kicker">YOUR RECORDS</span>
+                    <h2>Transaction History</h2>
+                    <p>View, edit or delete your recorded expenses.</p>
+                </div>
+
+                <span class="secure-label">
+                    <span class="status-dot"></span>
+                    Personal Records
+                </span>
+            </div>
+
+            <!-- EMPTY STATE: ID REQUIRED BY EXISTING JS -->
+            <div id="noData" class="no-data" style="display:none;">
+
+                <div class="empty-icon">₹</div>
+
+                <h3>No Expenses Found</h3>
+
+                <p>
+                    No transactions are available for your current selection.
+                    Add an expense or try changing your filters.
+                </p>
+
+                <a href="/add-expense.html" class="primary-btn">
+                    ＋ Add Your First Expense
+                </a>
+            </div>
+
+
+            <!-- TABLE ID AND TBODY ID MUST NOT CHANGE -->
+            <div class="table-scroll">
+                <table id="expenseTableWrapper">
+                    <thead>
+                        <tr>
+                            <th>AMOUNT</th>
+                            <th>CATEGORY</th>
+                            <th>DATE</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="expenseTable"></tbody>
+                </table>
+            </div>
+
+            <div class="table-note">
+                <span>ⓘ</span>
+                Your expense records are loaded from your account.
+            </div>
+
+        </section>
+
+
+        <!-- BOTTOM TIP -->
+        <section class="smart-tip">
+            <div class="tip-icon">✦</div>
+
+            <div>
+                <h3>Smart Money Tip</h3>
+                <p>
+                    Review your expenses regularly to understand your
+                    spending habits and identify opportunities to save.
+                </p>
+            </div>
+
+            <a href="/ai.html" class="tip-link">
+                Explore AI Insights →
+            </a>
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="expenses-footer">
+        <div class="footer-main">
+            <a href="/dashboard-page" class="footer-brand">
+                <span class="brand-icon">₹</span>
+                <strong>AI Expense Tracker</strong>
+            </a>
+
+            <p>
+                A smarter way to understand your money and manage
+                your everyday expenses.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <a href="/privacy-policy.html">Privacy Policy</a>
+            <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+        </div>
+
+        <div class="footer-bottom">
+            <span>© 2026 AI Expense Tracker</span>
+            <span>Made for smarter financial decisions.</span>
+        </div>
+    </footer>
+
+
+    <!-- KEEP THE EXISTING JAVASCRIPT -->
+    <script src="/static/js/expenses.js"></script>
+
 </body>
 </html>

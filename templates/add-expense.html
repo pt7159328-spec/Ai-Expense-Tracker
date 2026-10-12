@@ -3,65 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Expense</title>
+
+    <title>Add Expense | AI Expense Tracker</title>
+    <meta
+        name="description"
+        content="Add and record your expenses with AI Expense Tracker."
+    >
 
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/add-expense.css">
 </head>
-<body>
 
-<header class="header">
-    <div class="header-left">
-        <img src="/static/images/logo.png" alt="Logo">
-        <h2>AI Expense Tracker</h2>
-    </div>
+<body class="add-expense-page">
 
-    <div class="header-right">
-        <a href="/dashboard-page" class="back-btn">← Dashboard</a>
-    </div>
-</header>
+    <!-- HEADER -->
+    <header class="expense-header">
+        <a href="/dashboard-page" class="expense-brand">
+            <img src="/static/images/logo.png" alt="AI Expense Tracker logo">
+            <span>AI Expense <strong>Tracker</strong></span>
+        </a>
 
-<div class="container">
-    <div class="form-box">
-        <h2>➕ Add New Expense</h2>
-    <form id="expenseForm">
-    <input type="number" id="amount" placeholder="Enter Amount" required>
+        <a href="/dashboard-page" class="back-dashboard">
+            <span aria-hidden="true">←</span>
+            <span>Back to Dashboard</span>
+        </a>
+    </header>
 
-    <input type="text" id="category" placeholder="Category (Food, Travel...)" required>
+    <!-- MAIN CONTENT -->
+    <main class="expense-main">
 
-    <select id="currency" required>
-        <option value="INR">INR (₹)</option>
-        <option value="USD">USD ($)</option>
-        <option value="EUR">EUR (€)</option>
-        <option value="GBP">GBP (£)</option>
-        <option value="AED">AED (د.إ)</option>
-    </select>
+        <!-- INTRODUCTION -->
+        <section class="expense-intro">
+            <div class="intro-badge">
+                <span class="status-dot"></span>
+                SMART MONEY MANAGEMENT
+            </div>
 
-    <input type="date" id="date" required>
+            <h1>
+                Every expense<br>
+                tells a <span>story.</span>
+            </h1>
 
-    <button type="submit">Add Expense</button>
-    </form>
-    </div>
-</div>
+            <p class="intro-description">
+                Record your spending today. A clear record of your
+                expenses can help you understand your money habits
+                and make better financial decisions.
+            </p>
 
-<footer class="footer">
-    <h3>AI Expense Tracker</h3>
-    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
+            <div class="expense-benefits">
 
-    <div class="contact">
-        <p>📞 +91 9011621636</p>
-        <p>📧 mrpk49227@gmail.com</p>
-        <p>📨 prakash.work@zohomail.in</p>
-    </div>
-     <a href="privacy-policy.html">Privacy Policy</a>
+                <div class="benefit-row">
+                    <span class="benefit-icon purple-icon">₹</span>
+                    <div>
+                        <h3>Keep it organized</h3>
+                        <p>Record amounts and categories in one place.</p>
+                    </div>
+                </div>
 
-    <a href="terms-and-conditions.html">
-    Terms & Conditions
-    </a>
+                <div class="benefit-row">
+                    <span class="benefit-icon teal-icon">▤</span>
+                    <div>
+                        <h3>Build your expense history</h3>
+                        <p>Save entries with their currency and date.</p>
+                    </div>
+                </div>
 
-    <p class="copy">© 2026 AI Expense Tracker</p>
-</footer>
+                <div class="benefit-row">
+                    <span class="benefit-icon blue-icon">↗</span>
+                    <div>
+                        <h3>Understand your spending</h3>
+                        <p>Use your recorded expenses for future reviews.</p>
+                    </div>
+                </div>
 
-<script src="/static/js/expense.js"></script>
+            </div>
+
+            <div class="expense-tip">
+                <div class="tip-icon">✦</div>
+                <div>
+                    <span class="tip-label">A SMALL MONEY HABIT</span>
+                    <p>Record an expense soon after you make it.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FORM -->
+        <section class="expense-form-section">
+
+            <div class="expense-form-card">
+
+                <div class="form-card-header">
+                    <div class="form-heading-icon">＋</div>
+
+                    <div>
+                        <span class="form-eyebrow">NEW TRANSACTION</span>
+                        <h2>Add an expense</h2>
+                        <p>Enter the details below to record your spending.</p>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <form id="expenseForm">
+
+                    <!-- AMOUNT -->
+                    <div class="field-group amount-group">
+                        <label for="amount">Expense amount</label>
+
+                        <div class="amount-input-wrap">
+                            <span class="amount-symbol" aria-hidden="true">₹</span>
+
+                            <input
+                                type="number"
+                                id="amount"
+                                name="amount"
+                                placeholder="0.00"
+                                min="0.01"
+                                step="0.01"
+                                inputmode="decimal"
+                                required
+                            >
+                        </div>
+
+                        <p class="field-hint">
+                            Enter an amount greater than zero.
+                        </p>
+                    </div>
+
+                    <!-- CATEGORY -->
+                    <div class="field-group">
+                        <label for="category">Expense category</label>
+
+                        <div class="standard-input-wrap">
+                            <span class="field-icon" aria-hidden="true">▤</span>
+
+                            <input
+                                type="text"
+                                id="category"
+                                name="category"
+                                list="expenseCategories"
+                                placeholder="e.g. Food, Travel, Shopping"
+                                maxlength="60"
+                                autocomplete="off"
+                                required
+                            >
+                        </div>
+
+                        <datalist id="expenseCategories">
+                            <option value="Food"></option>
+                            <option value="Travel"></option>
+                            <option value="Shopping"></option>
+                            <option value="Education"></option>
+                            <option value="Healthcare"></option>
+                            <option value="Bills"></option>
+                            <option value="Entertainment"></option>
+                            <option value="Groceries"></option>
+                            <option value="Transport"></option>
+                            <option value="Other"></option>
+                        </datalist>
+
+                        <p class="field-hint">
+                            Choose a suggestion or type your own category.
+                        </p>
+                    </div>
+
+                    <!-- CURRENCY -->
+                    <div class="field-group">
+                        <label for="currency">Currency</label>
+
+                        <div class="standard-input-wrap">
+                            <span class="field-icon" aria-hidden="true">◎</span>
+
+                            <select id="currency" name="currency" required>
+                                <option value="INR" selected>INR — Indian Rupee (₹)</option>
+                                <option value="USD">USD — US Dollar ($)</option>
+                                <option value="EUR">EUR — Euro (€)</option>
+                                <option value="GBP">GBP — British Pound (£)</option>
+                                <option value="AED">AED — UAE Dirham (د.إ)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- DATE -->
+                    <div class="field-group">
+                        <label for="date">Expense date</label>
+
+                        <div class="standard-input-wrap">
+                            <span class="field-icon" aria-hidden="true">▦</span>
+
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <button type="submit" class="save-expense-btn">
+                        <span>＋</span>
+                        Add Expense
+                        <span class="button-arrow" aria-hidden="true">→</span>
+                    </button>
+
+                    <p class="form-security-note">
+                        <span aria-hidden="true">◇</span>
+                        Your expense is submitted using your existing login token.
+                    </p>
+
+                </form>
+
+            </div>
+
+            <a href="/expenses.html" class="view-expenses-link">
+                Want to review previous entries?
+                <strong>View all expenses →</strong>
+            </a>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="expense-footer">
+        <span>© 2026 AI Expense Tracker</span>
+
+        <div class="footer-links">
+            <a href="/privacy-policy.html">Privacy Policy</a>
+            <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+        </div>
+
+        <span>Plan smart. Spend wisely.</span>
+    </footer>
+
+    <!-- Keep the existing expense API logic -->
+    <script src="/static/js/expense.js"></script>
+
+    <!-- Set today's date as the initial date -->
+    <script>
+        const expenseDateInput = document.getElementById("date");
+
+        if (expenseDateInput && !expenseDateInput.value) {
+            const now = new Date();
+            const localDate = [
+                now.getFullYear(),
+                String(now.getMonth() + 1).padStart(2, "0"),
+                String(now.getDate()).padStart(2, "0")
+            ].join("-");
+
+            expenseDateInput.value = localDate;
+        }
+    </script>
+
 </body>
 </html>

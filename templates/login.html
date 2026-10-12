@@ -2,36 +2,365 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - AI Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta
+        name="description"
+        content="Sign in to your AI Expense Tracker account and manage your expenses."
+    >
+
+    <meta name="theme-color" content="#080b16">
+
+    <title>Login | AI Expense Tracker</title>
+
+    <!-- Shared CSS: unchanged -->
     <link rel="stylesheet" href="/static/css/common.css">
+
+    <!-- Login page CSS -->
     <link rel="stylesheet" href="/static/css/login.css">
 </head>
-<body>
 
-<nav class="navbar">
-    <div class="logo">
-        <img src="/static/images/logo.png">
-        <span>AI Expense Tracker</span>
-    </div>
-</nav>
+<body class="login-page">
 
-<div class="container">
-    <div class="form-box">
-        <h2>Login</h2>
-        <p>Welcome back! Login to continue</p>
+    <!-- Background decoration -->
+    <div class="login-bg-glow login-bg-glow-one" aria-hidden="true"></div>
+    <div class="login-bg-glow login-bg-glow-two" aria-hidden="true"></div>
+    <div class="login-grid-pattern" aria-hidden="true"></div>
 
-        <form id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Email" required>
-            <input type="password" id="loginPassword" placeholder="Password" required>
+    <!-- Header -->
+    <header class="login-header">
+        <a href="/" class="login-brand" aria-label="AI Expense Tracker home">
+            <span class="login-brand-icon">
+                <img
+                    src="/static/images/logo.png"
+                    alt=""
+                    width="42"
+                    height="42"
+                >
+            </span>
 
-            <button type="submit">Login</button>
-        </form>
+            <span class="login-brand-text">
+                <strong>AI Expense</strong>
+                <span>TRACKER</span>
+            </span>
+        </a>
 
-        <p>Don't have an account? <a href="/register-page">Register</a></p>
-    </div>
-</div>
+        <a href="/" class="login-home-link">
+            <span aria-hidden="true">←</span>
+            Back to Home
+        </a>
+    </header>
 
-<script src="/static/js/auth.js"></script>
+    <!-- Main content -->
+    <main class="login-main">
+
+        <!-- Left information panel -->
+        <section class="login-intro">
+            <div class="login-status">
+                <span class="login-status-dot"></span>
+                SMART MONEY MANAGEMENT
+            </div>
+
+            <h1>
+                Welcome back to
+                <span class="login-gradient-text">smarter spending.</span>
+            </h1>
+
+            <p class="login-intro-description">
+                Your money, your goals, your future.
+                Sign in to track your expenses and understand
+                your spending habits in one place.
+            </p>
+
+            <!-- Decorative financial preview.
+                 These are visual illustrations, not live account data. -->
+            <div class="login-preview">
+
+                <div class="login-preview-top">
+                    <div>
+                        <span class="login-preview-label">YOUR MONEY JOURNEY</span>
+                        <h2>Spend with purpose.</h2>
+                    </div>
+
+                    <span class="login-preview-symbol" aria-hidden="true">✦</span>
+                </div>
+
+                <div class="login-preview-chart" aria-hidden="true">
+                    <div class="login-chart-line"></div>
+
+                    <div class="login-chart-bars">
+                        <span style="--bar-height: 38%"></span>
+                        <span style="--bar-height: 58%"></span>
+                        <span style="--bar-height: 45%"></span>
+                        <span style="--bar-height: 75%"></span>
+                        <span style="--bar-height: 54%"></span>
+                        <span style="--bar-height: 88%"></span>
+                        <span style="--bar-height: 67%"></span>
+                    </div>
+                </div>
+
+                <div class="login-preview-footer">
+                    <span><i class="login-mini-dot teal"></i> Track expenses</span>
+                    <span><i class="login-mini-dot purple"></i> View insights</span>
+                </div>
+
+            </div>
+
+            <div class="login-benefits">
+                <div class="login-benefit">
+                    <span class="login-benefit-icon" aria-hidden="true">↗</span>
+                    <div>
+                        <strong>Understand your spending</strong>
+                        <p>Keep your expense records organized.</p>
+                    </div>
+                </div>
+
+                <div class="login-benefit">
+                    <span class="login-benefit-icon" aria-hidden="true">✧</span>
+                    <div>
+                        <strong>Make informed decisions</strong>
+                        <p>Use available insights to plan ahead.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login form -->
+        <section class="login-form-section" aria-labelledby="loginTitle">
+
+            <div class="login-card">
+
+                <div class="login-card-heading">
+                    <div class="login-lock-icon" aria-hidden="true">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <rect
+                                x="4.5"
+                                y="10"
+                                width="15"
+                                height="11"
+                                rx="3"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                            />
+                            <path
+                                d="M8 10V7a4 4 0 0 1 8 0v3"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                            />
+                            <circle cx="12" cy="15.5" r="1.2" fill="currentColor"/>
+                        </svg>
+                    </div>
+
+                    <span class="login-eyebrow">YOUR ACCOUNT</span>
+
+                    <h2 id="loginTitle">Welcome back!</h2>
+
+                    <p>Enter your details to sign in to your account.</p>
+                </div>
+
+                <form id="loginForm" class="login-form">
+
+                    <div class="login-field">
+                        <label for="loginEmail">Email address</label>
+
+                        <div class="login-input-wrap">
+                            <span class="login-input-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <rect
+                                        x="3.5"
+                                        y="5"
+                                        width="17"
+                                        height="14"
+                                        rx="3"
+                                        stroke="currentColor"
+                                        stroke-width="1.6"
+                                    />
+                                    <path
+                                        d="m5 7 7 5 7-5"
+                                        stroke="currentColor"
+                                        stroke-width="1.6"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    />
+                                </svg>
+                            </span>
+
+                            <input
+                                type="email"
+                                id="loginEmail"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="login-field">
+                        <label for="loginPassword">Password</label>
+
+                        <div class="login-input-wrap">
+                            <span class="login-input-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <rect
+                                        x="4.5"
+                                        y="10"
+                                        width="15"
+                                        height="11"
+                                        rx="3"
+                                        stroke="currentColor"
+                                        stroke-width="1.6"
+                                    />
+                                    <path
+                                        d="M8 10V7a4 4 0 0 1 8 0v3"
+                                        stroke="currentColor"
+                                        stroke-width="1.6"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </span>
+
+                            <input
+                                type="password"
+                                id="loginPassword"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="login-password-toggle"
+                                id="togglePassword"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"
+                                        stroke="currentColor"
+                                        stroke-width="1.6"
+                                    />
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="2.7"
+                                        stroke="currentColor"
+                                        stroke-width="1.6"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="login-form-options">
+                        <span class="login-form-hint">
+                            <span aria-hidden="true">✦</span>
+                            Your money journey starts here
+                        </span>
+                    </div>
+
+                    <button type="submit" class="login-submit" id="loginSubmit">
+                        <span>Sign In</span>
+                        <span class="login-submit-arrow" aria-hidden="true">→</span>
+                    </button>
+
+                    <p
+                        class="login-message"
+                        id="loginMessage"
+                        role="status"
+                        aria-live="polite"
+                    ></p>
+
+                </form>
+
+                <div class="login-divider">
+                    <span></span>
+                    <p>NEW TO AI EXPENSE TRACKER?</p>
+                    <span></span>
+                </div>
+
+                <a href="/register-page" class="login-create-account">
+                    Create an account
+                    <span aria-hidden="true">↗</span>
+                </a>
+
+                <p class="login-terms-note">
+                    By signing in, you agree to use the platform responsibly.
+                    <br>
+                    <a href="/privacy-policy.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="/terms-and-conditions.html">Terms</a>
+                </p>
+
+            </div>
+
+            <p class="login-bottom-note">
+                <span aria-hidden="true">✦</span>
+                Small steps. Better money habits.
+            </p>
+
+        </section>
+
+    </main>
+
+    <footer class="login-footer">
+        <span>© AI Expense Tracker</span>
+        <span>Made for smarter money management</span>
+    </footer>
+
+    <!-- Existing authentication integration -->
+    <script src="/static/js/auth.js"></script>
+
+    <!-- Password visibility and inline login feedback -->
+    <script>
+        (() => {
+            const passwordInput = document.getElementById("loginPassword");
+            const toggleButton = document.getElementById("togglePassword");
+            const loginForm = document.getElementById("loginForm");
+            const message = document.getElementById("loginMessage");
+            const submitButton = document.getElementById("loginSubmit");
+
+            if (passwordInput && toggleButton) {
+                toggleButton.addEventListener("click", () => {
+                    const showPassword = passwordInput.type === "password";
+
+                    passwordInput.type = showPassword ? "text" : "password";
+                    toggleButton.setAttribute(
+                        "aria-label",
+                        showPassword ? "Hide password" : "Show password"
+                    );
+                    toggleButton.setAttribute("aria-pressed", String(showPassword));
+                });
+            }
+
+            if (loginForm && message && submitButton) {
+                loginForm.addEventListener("submit", () => {
+                    message.textContent = "";
+                    message.className = "login-message";
+                    submitButton.classList.add("is-loading");
+                    submitButton.querySelector("span").textContent = "Signing in...";
+                    submitButton.disabled = true;
+                });
+
+                // The existing auth.js uses alerts for API failures.
+                // Re-enable the button if the request fails or validation stops submission.
+                loginForm.addEventListener("input", () => {
+                    if (submitButton.disabled) {
+                        submitButton.disabled = false;
+                        submitButton.classList.remove("is-loading");
+                        submitButton.querySelector("span").textContent = "Sign In";
+                    }
+                });
+            }
+        })();
+    </script>
+
 </body>
 </html>

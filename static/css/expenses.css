@@ -1,139 +1,941 @@
-body {
+/* =========================================
+   AI EXPENSE TRACKER - EXPENSES PAGE
+   Scoped styles: expenses page only
+========================================= */
+
+.expenses-page {
+    --exp-bg: #080d1b;
+    --exp-panel: #10182b;
+    --exp-panel-light: #141f35;
+    --exp-border: rgba(164, 181, 218, 0.14);
+    --exp-text: #f1f5ff;
+    --exp-muted: #95a3bd;
+    --exp-teal: #35e0c1;
+    --exp-purple: #a78bfa;
+    --exp-blue: #65a5ff;
+
     margin: 0;
-    font-family: Arial;
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(72, 82, 190, 0.16),
+            transparent 29rem
+        ),
+        radial-gradient(
+            circle at 95% 18%,
+            rgba(35, 205, 178, 0.08),
+            transparent 24rem
+        ),
+        var(--exp-bg);
+
+    color: var(--exp-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
 }
 
-/* HEADER */
-.header {
+.expenses-page *,
+.expenses-page *::before,
+.expenses-page *::after {
+    box-sizing: border-box;
+}
+
+.expenses-page a {
+    text-decoration: none;
+}
+
+.expenses-page button,
+.expenses-page input,
+.expenses-page select {
+    font: inherit;
+}
+
+.expenses-page button,
+.expenses-page a,
+.expenses-page input,
+.expenses-page select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+/* NAVBAR */
+
+.expenses-page .expenses-header {
+    min-height: 82px;
+    padding: 15px clamp(18px, 5vw, 76px);
     display: flex;
     justify-content: space-between;
-    background: #007bff;
-    color: white;
-    padding: 15px;
-}
-
-.header-left {
-    display: flex;
     align-items: center;
+    gap: 20px;
+
+    background: rgba(8, 13, 27, 0.86);
+    border-bottom: 1px solid var(--exp-border);
+    backdrop-filter: blur(18px);
 }
 
-.header-left img {
-    width: 35px;
-    margin-right: 10px;
+.expenses-page .brand,
+.expenses-page .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--exp-text);
 }
 
-.back-btn {
-    color: white;
-    text-decoration: none;
-    background: rgba(255,255,255,0.2);
-    padding: 6px 12px;
-    border-radius: 5px;
+.expenses-page .brand-icon {
+    width: 43px;
+    height: 43px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 14px;
+    color: #071522;
+    font-size: 24px;
+    font-weight: 800;
+
+    background: linear-gradient(
+        135deg,
+        var(--exp-teal),
+        #74b9ff
+    );
+
+    box-shadow: 0 0 25px rgba(53, 224, 193, 0.13);
 }
 
-/* CONTAINER */
-.container {
-    padding: 20px;
-}
-
-/* NO DATA */
-.no-data {
-    text-align: center;
-    margin-top: 50px;
-}
-
-.no-data h3 {
-    color: #007bff;
-}
-
-.btn {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 10px 15px;
-    background: #007bff;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-}
-
-/* TABLE */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ccc;
-    text-align: center;
-}
-
-th {
-    background: #007bff;
-    color: white;
-}
-
-/* ACTION BUTTONS */
-.action-btn {
-    padding: 5px 10px;
-    margin: 2px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.edit {
-    background: orange;
-    color: white;
-}
-
-.delete {
-    background: red;
-    color: white;
-}
-
-/* FILTER SECTION */
-.filter-section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: end;
-    background: #f5f7fa;
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
-}
-
-.filter-group {
+.expenses-page .brand-text {
     display: flex;
     flex-direction: column;
 }
 
-.filter-group label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
+.expenses-page .brand-text strong {
+    font-size: 16px;
+    letter-spacing: -0.3px;
 }
 
-.filter-group input,
-.filter-group select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    min-width: 180px;
+.expenses-page .brand-text small {
+    color: var(--exp-muted);
+    font-size: 11px;
+    margin-top: 2px;
 }
 
-.filter-buttons {
+.expenses-page .header-actions {
     display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.expenses-page .nav-link,
+.expenses-page .add-expense-btn {
+    min-height: 42px;
+    padding: 10px 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 650;
+    transition: 0.2s ease;
+}
+
+.expenses-page .nav-link {
+    color: #d4def2;
+    border: 1px solid var(--exp-border);
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.expenses-page .nav-link:hover {
+    border-color: rgba(53, 224, 193, 0.45);
+    color: var(--exp-teal);
+}
+
+.expenses-page .add-expense-btn,
+.expenses-page .primary-btn {
+    color: #061a1a;
+    background: linear-gradient(
+        115deg,
+        var(--exp-teal),
+        #78e9d5
+    );
+    font-weight: 750;
+    box-shadow: 0 8px 24px rgba(53, 224, 193, 0.10);
+}
+
+.expenses-page .add-expense-btn:hover,
+.expenses-page .primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(53, 224, 193, 0.2);
+}
+
+
+/* MAIN LAYOUT */
+
+.expenses-page .expenses-main {
+    width: min(1240px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 46px 0 64px;
+}
+
+.expenses-page .page-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.expenses-page .eyebrow,
+.expenses-page .section-kicker {
+    display: block;
+    color: var(--exp-teal);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.expenses-page .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.expenses-page .status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--exp-teal);
+    box-shadow: 0 0 12px rgba(53, 224, 193, 0.65);
+}
+
+.expenses-page .page-intro h1 {
+    margin: 12px 0 8px;
+    color: var(--exp-text);
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+}
+
+.expenses-page .page-intro h1 span {
+    color: var(--exp-teal);
+}
+
+.expenses-page .page-intro p {
+    max-width: 620px;
+    margin: 0;
+    color: var(--exp-muted);
+    font-size: 14px;
+}
+
+.expenses-page .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 12px;
+    white-space: nowrap;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+
+/* INFO CARDS */
+
+.expenses-page .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 25px;
+}
+
+.expenses-page .info-card {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 21px;
+
+    border: 1px solid var(--exp-border);
+    border-radius: 17px;
+    background: linear-gradient(
+        140deg,
+        rgba(20, 31, 53, 0.92),
+        rgba(13, 21, 39, 0.95)
+    );
+
+    transition: border-color 0.2s ease,
+                transform 0.2s ease;
+}
+
+.expenses-page .info-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(53, 224, 193, 0.30);
+}
+
+.expenses-page .info-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.expenses-page .purple-icon {
+    color: var(--exp-purple);
+    background: rgba(167, 139, 250, 0.12);
+}
+
+.expenses-page .teal-icon {
+    color: var(--exp-teal);
+    background: rgba(53, 224, 193, 0.10);
+}
+
+.expenses-page .blue-icon {
+    color: var(--exp-blue);
+    background: rgba(101, 165, 255, 0.12);
+}
+
+.expenses-page .info-card p {
+    margin: 0 0 4px;
+    color: var(--exp-muted);
+    font-size: 11px;
+}
+
+.expenses-page .info-card h3 {
+    margin: 0 0 5px;
+    color: var(--exp-text);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.expenses-page .info-card div:last-child > span {
+    display: block;
+    color: var(--exp-muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+
+/* PANELS */
+
+.expenses-page .filter-panel,
+.expenses-page .transactions-panel {
+    padding: clamp(19px, 3vw, 30px);
+    border: 1px solid var(--exp-border);
+    border-radius: 20px;
+
+    background: linear-gradient(
+        145deg,
+        rgba(17, 26, 46, 0.97),
+        rgba(12, 19, 35, 0.98)
+    );
+
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.10);
+}
+
+.expenses-page .filter-panel {
+    margin-bottom: 25px;
+}
+
+.expenses-page .section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.expenses-page .section-heading h2 {
+    margin: 6px 0;
+    color: var(--exp-text);
+    font-size: 21px;
+    letter-spacing: -0.4px;
+}
+
+.expenses-page .section-heading p {
+    margin: 0;
+    color: var(--exp-muted);
+    font-size: 12px;
+}
+
+.expenses-page .filter-badge,
+.expenses-page .secure-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid var(--exp-border);
+    border-radius: 9px;
+    color: #b9c8e2;
+    background: rgba(255, 255, 255, 0.025);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+
+/* FILTER FORM */
+
+.expenses-page .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.expenses-page .filter-group {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.expenses-page .filter-group label {
+    color: #c8d3e8;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.expenses-page .filter-group input,
+.expenses-page .filter-group select {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    padding: 0 12px;
+
+    color: var(--exp-text);
+    background: #0b1325;
+    border: 1px solid rgba(157, 178, 215, 0.19);
+    border-radius: 10px;
+    outline: none;
+
+    font-size: 12px;
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.expenses-page .filter-group input:focus,
+.expenses-page .filter-group select:focus {
+    border-color: var(--exp-teal);
+    box-shadow: 0 0 0 3px rgba(53, 224, 193, 0.09);
+}
+
+.expenses-page .filter-group input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.expenses-page .filter-group select option {
+    color: var(--exp-text);
+    background: #10182b;
+}
+
+.expenses-page .filter-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--exp-border);
+}
+
+.expenses-page .filter-footer > p {
+    margin: 0;
+    color: var(--exp-muted);
+    font-size: 11px;
+}
+
+.expenses-page .hint-icon {
+    color: var(--exp-teal);
+    margin-right: 5px;
+}
+
+.expenses-page .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.filter-buttons .btn {
-    border: none;
+.expenses-page .filter-btn,
+.expenses-page .pdf-btn {
+    min-height: 42px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
     cursor: pointer;
-    margin-top: 0;
+
+    font-size: 12px;
+    font-weight: 750;
+    transition: transform 0.2s ease,
+                background 0.2s ease,
+                border-color 0.2s ease;
 }
 
-.pdf-btn {
-    background: #28a745;
+.expenses-page .filter-btn {
+    color: #061a1a;
+    background: var(--exp-teal);
+}
+
+.expenses-page .pdf-btn {
+    color: #d5c9ff;
+    background: rgba(167, 139, 250, 0.09);
+    border-color: rgba(167, 139, 250, 0.26);
+}
+
+.expenses-page .filter-btn:hover,
+.expenses-page .pdf-btn:hover {
+    transform: translateY(-2px);
+}
+
+.expenses-page .pdf-btn:hover {
+    background: rgba(167, 139, 250, 0.17);
+}
+
+
+/* TRANSACTION TABLE */
+
+.expenses-page .transactions-panel {
+    overflow: hidden;
+}
+
+.expenses-page .transactions-heading {
+    align-items: center;
+}
+
+.expenses-page .secure-label .status-dot {
+    width: 6px;
+    height: 6px;
+}
+
+.expenses-page .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--exp-border);
+    border-radius: 13px;
+}
+
+.expenses-page table#expenseTableWrapper {
+    display: table;
+    width: 100%;
+    min-width: 580px;
+    margin: 0;
+    border: 0;
+    border-collapse: collapse;
+    background: transparent;
+}
+
+.expenses-page #expenseTableWrapper thead {
+    background: #17233b;
+}
+
+.expenses-page #expenseTableWrapper th {
+    padding: 16px 18px;
+    color: #aebed8;
+    background: #17233b;
+    border-bottom: 1px solid var(--exp-border);
+    text-align: left;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+}
+
+.expenses-page #expenseTableWrapper td {
+    padding: 17px 18px;
+    color: #dce5f6;
+    background: transparent;
+    border-bottom: 1px solid rgba(164, 181, 218, 0.09);
+    text-align: left;
+    font-size: 12px;
+}
+
+.expenses-page #expenseTableWrapper tbody tr {
+    transition: background 0.2s ease;
+}
+
+.expenses-page #expenseTableWrapper tbody tr:hover {
+    background: rgba(53, 224, 193, 0.035);
+}
+
+.expenses-page #expenseTableWrapper tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.expenses-page .action-btn {
+    min-height: 32px;
+    padding: 7px 11px;
+    margin: 2px;
+
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+
+    font-size: 11px;
+    font-weight: 700;
+    transition: background 0.2s ease,
+                transform 0.2s ease;
+}
+
+.expenses-page .action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.expenses-page .action-btn.edit {
+    color: #ffd58a;
+    background: rgba(255, 180, 70, 0.10);
+    border-color: rgba(255, 180, 70, 0.17);
+}
+
+.expenses-page .action-btn.delete {
+    color: #ff9aa8;
+    background: rgba(255, 94, 119, 0.09);
+    border-color: rgba(255, 94, 119, 0.16);
+}
+
+.expenses-page .table-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    color: var(--exp-muted);
+    font-size: 10px;
+}
+
+.expenses-page .table-note span {
+    color: var(--exp-teal);
+}
+
+
+/* EMPTY STATE */
+
+.expenses-page .no-data {
+    padding: 42px 20px;
+    margin: 0;
+    text-align: center;
+    border: 1px dashed rgba(157, 178, 215, 0.22);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.expenses-page .empty-icon {
+    width: 65px;
+    height: 65px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 18px;
+    border: 1px solid rgba(53, 224, 193, 0.22);
+    border-radius: 20px;
+    color: var(--exp-teal);
+    background: rgba(53, 224, 193, 0.08);
+    font-size: 31px;
+    font-weight: 800;
+}
+
+.expenses-page .no-data h3 {
+    margin: 0 0 8px;
+    color: var(--exp-text);
+    font-size: 21px;
+}
+
+.expenses-page .no-data p {
+    max-width: 450px;
+    margin: 0 auto 20px;
+    color: var(--exp-muted);
+    font-size: 12px;
+}
+
+.expenses-page .no-data .primary-btn {
+    display: inline-flex;
+}
+
+
+/* SMART TIP */
+
+.expenses-page .smart-tip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 25px;
+    padding: 22px 25px;
+
+    border: 1px solid rgba(53, 224, 193, 0.16);
+    border-radius: 16px;
+    background: linear-gradient(
+        110deg,
+        rgba(53, 224, 193, 0.07),
+        rgba(101, 165, 255, 0.045)
+    );
+}
+
+.expenses-page .tip-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 13px;
+    color: var(--exp-teal);
+    background: rgba(53, 224, 193, 0.12);
+    font-size: 22px;
+}
+
+.expenses-page .smart-tip h3 {
+    margin: 0 0 4px;
+    color: var(--exp-text);
+    font-size: 14px;
+}
+
+.expenses-page .smart-tip p {
+    margin: 0;
+    color: var(--exp-muted);
+    font-size: 11px;
+}
+
+.expenses-page .tip-link {
+    margin-left: auto;
+    color: var(--exp-teal);
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.expenses-page .tip-link:hover {
+    color: #a1f7e7;
+}
+
+
+/* FOOTER */
+
+.expenses-page .expenses-footer {
+    padding: 30px clamp(20px, 5vw, 76px) 20px;
+    border-top: 1px solid var(--exp-border);
+    background: rgba(5, 9, 19, 0.7);
+}
+
+.expenses-page .footer-main {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.expenses-page .footer-brand {
+    font-size: 14px;
+}
+
+.expenses-page .footer-brand .brand-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: 19px;
+}
+
+.expenses-page .footer-main > p {
+    max-width: 470px;
+    margin: 13px 0 22px;
+    color: var(--exp-muted);
+    font-size: 11px;
+}
+
+.expenses-page .footer-links {
+    max-width: 1240px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 0 auto;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--exp-border);
+}
+
+.expenses-page .footer-links a {
+    color: #aab7cf;
+    font-size: 11px;
+}
+
+.expenses-page .footer-links a:hover {
+    color: var(--exp-teal);
+}
+
+.expenses-page .footer-bottom {
+    max-width: 1240px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 17px auto 0;
+    color: #75849e;
+    font-size: 10px;
+}
+
+
+/* TABLET */
+
+@media (max-width: 900px) {
+    .expenses-page .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .expenses-page .info-card {
+        padding: 17px;
+    }
+
+    .expenses-page .filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .expenses-page .page-intro {
+        align-items: flex-start;
+    }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .expenses-page .expenses-header {
+        padding: 13px 16px;
+        align-items: flex-start;
+    }
+
+    .expenses-page .brand {
+        gap: 8px;
+    }
+
+    .expenses-page .brand-icon {
+        width: 37px;
+        height: 37px;
+        border-radius: 11px;
+        font-size: 20px;
+    }
+
+    .expenses-page .brand-text strong {
+        font-size: 12px;
+    }
+
+    .expenses-page .brand-text small {
+        font-size: 9px;
+    }
+
+    .expenses-page .header-actions {
+        gap: 6px;
+    }
+
+    .expenses-page .nav-link,
+    .expenses-page .add-expense-btn {
+        min-height: 36px;
+        padding: 8px;
+        gap: 4px;
+        font-size: 10px;
+    }
+
+    .expenses-page .expenses-main {
+        width: calc(100% - 28px);
+        padding: 32px 0 42px;
+    }
+
+    .expenses-page .page-intro {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 18px;
+    }
+
+    .expenses-page .page-intro h1 {
+        font-size: 35px;
+    }
+
+    .expenses-page .page-intro p {
+        font-size: 12px;
+    }
+
+    .expenses-page .page-intro .primary-btn {
+        align-self: flex-start;
+    }
+
+    .expenses-page .info-grid {
+        gap: 11px;
+    }
+
+    .expenses-page .filter-panel,
+    .expenses-page .transactions-panel {
+        padding: 17px 13px;
+        border-radius: 15px;
+    }
+
+    .expenses-page .section-heading {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .expenses-page .section-heading h2 {
+        font-size: 19px;
+    }
+
+    .expenses-page .filter-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .expenses-page .filter-footer {
+        align-items: stretch;
+    }
+
+    .expenses-page .filter-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .expenses-page .filter-btn,
+    .expenses-page .pdf-btn {
+        width: 100%;
+    }
+
+    .expenses-page .transactions-heading {
+        align-items: flex-start;
+    }
+
+    .expenses-page .smart-tip {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding: 18px;
+    }
+
+    .expenses-page .smart-tip > div:nth-child(2) {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .expenses-page .tip-link {
+        margin-left: 58px;
+    }
+
+    .expenses-page .footer-links {
+        gap: 12px;
+    }
+
+    .expenses-page .footer-bottom {
+        flex-direction: column;
+    }
+}
+
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+    .expenses-page *,
+    .expenses-page *::before,
+    .expenses-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
 }

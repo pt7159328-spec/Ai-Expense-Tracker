@@ -3,80 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Insights</title>
+
+    <title>AI Spending Analysis | AI Expense Tracker</title>
 
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/ai.css">
 </head>
-<body>
 
-<!-- HEADER -->
-<header class="header">
-    <div class="header-left">
-        <img src="/static/images/logo.png" alt="Logo">
-        <h2>AI Expense Tracker</h2>
-    </div>
+<body class="ai-analysis-page">
 
-    <div class="header-right">
-        <a href="/dashboard-page" class="back-btn">← Dashboard</a>
-    </div>
-</header>
+    <!-- HEADER -->
+    <header class="analysis-header">
+        <a href="/dashboard-page" class="analysis-brand">
+            <img src="/static/images/logo.png" alt="AI Expense Tracker logo">
 
-<!-- MAIN -->
-<div class="container">
+            <span class="analysis-brand-copy">
+                <strong>AI Expense Tracker</strong>
+                <small>Smart money management</small>
+            </span>
+        </a>
 
-    <!-- TITLE -->
-    <div class="title">
-        <h1>🤖 AI Insights</h1>
-        <p>Smart analysis of your spending behavior</p>
-    </div>
+        <div class="analysis-header-actions">
+            <a href="/summary.html" class="analysis-nav-link">
+                Summary
+            </a>
 
-    <!-- AI CARDS -->
-    <div class="ai-cards">
+            <a href="/dashboard-page" class="analysis-back-link">
+                <span aria-hidden="true">←</span> Dashboard
+            </a>
+        </div>
+    </header>
 
-        <div class="card">
-            <h3>💰 Total Spending</h3>
-            <p id="total">Loading...</p>
+
+    <main class="analysis-main">
+
+        <!-- HERO -->
+        <section class="analysis-hero">
+            <div class="analysis-hero-content">
+
+                <span class="analysis-eyebrow">
+                    <span class="analysis-live-dot"></span>
+                    YOUR PERSONAL FINANCE OVERVIEW
+                </span>
+
+                <h1>AI Spending <span>Analysis</span></h1>
+
+                <p>
+                    Understand your spending patterns, discover your
+                    highest expense category and get suggestions to
+                    build smarter money habits.
+                </p>
+
+                <div class="analysis-hero-actions">
+                    <button
+                        type="button"
+                        class="analysis-refresh-btn"
+                        onclick="loadAI()"
+                    >
+                        <span aria-hidden="true">↻</span>
+                        Refresh Analysis
+                    </button>
+
+                    <a href="/expenses.html" class="analysis-secondary-btn">
+                        View Transactions <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="analysis-visual" aria-hidden="true">
+                <div class="analysis-visual-ring ring-outer"></div>
+                <div class="analysis-visual-ring ring-inner"></div>
+
+                <div class="analysis-visual-core">
+                    <span class="analysis-robot-icon">✦</span>
+                    <span class="analysis-robot-text">INSIGHTS</span>
+                </div>
+
+                <span class="analysis-float float-top">↗</span>
+                <span class="analysis-float float-bottom">₹</span>
+            </div>
+        </section>
+
+
+        <!-- SECTION INTRO -->
+        <section class="analysis-section-intro">
+            <div>
+                <span class="analysis-section-kicker">YOUR MONEY, EXPLAINED</span>
+                <h2>Spending Overview</h2>
+                <p>Insights calculated from your saved expense records.</p>
+            </div>
+
+            <span class="analysis-data-label">
+                <span class="analysis-live-dot"></span>
+                Account Analysis
+            </span>
+        </section>
+
+
+        <!-- ANALYSIS CARDS -->
+        <section class="analysis-cards">
+
+            <!-- TOTAL SPENDING -->
+            <article class="analysis-card total-spending-card">
+                <div class="analysis-card-top">
+                    <div class="analysis-card-icon">₹</div>
+                    <span class="analysis-card-label">TOTAL</span>
+                </div>
+
+                <p class="analysis-card-title">Total Spending</p>
+
+                <h3 id="total" class="analysis-card-value">Loading...</h3>
+
+                <p class="analysis-card-description">
+                    Total amount across your recorded expenses.
+                </p>
+
+                <div class="analysis-card-bottom">
+                    <span class="analysis-card-indicator"></span>
+                    Overall spending
+                </div>
+            </article>
+
+
+            <!-- HIGHEST CATEGORY -->
+            <article class="analysis-card category-spending-card">
+                <div class="analysis-card-top">
+                    <div class="analysis-card-icon">▤</div>
+                    <span class="analysis-card-label">CATEGORY</span>
+                </div>
+
+                <p class="analysis-card-title">Highest Spending Category</p>
+
+                <h3 id="category" class="analysis-card-value">
+                    Loading...
+                </h3>
+
+                <p class="analysis-card-description">
+                    The category with the highest combined expense amount.
+                </p>
+
+                <div class="analysis-card-bottom">
+                    <span class="analysis-card-indicator"></span>
+                    Category breakdown
+                </div>
+            </article>
+
+
+            <!-- ALERT -->
+            <article class="analysis-card spending-alert-card">
+                <div class="analysis-card-top">
+                    <div class="analysis-card-icon">!</div>
+                    <span class="analysis-card-label">ALERT</span>
+                </div>
+
+                <p class="analysis-card-title">Spending Alert</p>
+
+                <h3 id="alert" class="analysis-card-value">
+                    Loading...
+                </h3>
+
+                <p class="analysis-card-description">
+                    A spending status based on the current analysis rules.
+                </p>
+
+                <div class="analysis-card-bottom">
+                    <span class="analysis-card-indicator"></span>
+                    Spending status
+                </div>
+            </article>
+
+
+            <!-- SUGGESTION -->
+            <article class="analysis-card saving-suggestion-card">
+                <div class="analysis-card-top">
+                    <div class="analysis-card-icon">✦</div>
+                    <span class="analysis-card-label">SUGGESTION</span>
+                </div>
+
+                <p class="analysis-card-title">Savings Suggestion</p>
+
+                <h3 id="suggestion" class="analysis-card-value">
+                    Loading...
+                </h3>
+
+                <p class="analysis-card-description">
+                    A simple suggestion based on your highest-spending category.
+                </p>
+
+                <div class="analysis-card-bottom">
+                    <span class="analysis-card-indicator"></span>
+                    Money-saving tip
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- SMART HABITS PANEL -->
+        <section class="analysis-habits-panel">
+            <div class="analysis-habits-icon">✧</div>
+
+            <div class="analysis-habits-content">
+                <span class="analysis-section-kicker">SMART MONEY HABITS</span>
+                <h2>Make every expense count.</h2>
+
+                <p>
+                    Review your spending regularly, set a realistic budget
+                    and look for small changes that support your savings goals.
+                </p>
+            </div>
+
+            <a href="/budget.html" class="analysis-habits-link">
+                Explore Budget <span aria-hidden="true">→</span>
+            </a>
+        </section>
+
+
+        <!-- NOTE -->
+        <p class="analysis-disclaimer">
+            <span aria-hidden="true">ⓘ</span>
+            Insights are based on the expense records available in your account.
+            Review your transactions if any result looks incorrect.
+        </p>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="analysis-footer">
+        <div class="analysis-footer-main">
+            <a href="/dashboard-page" class="analysis-footer-brand">
+                <img src="/static/images/logo.png" alt="">
+                <strong>AI Expense Tracker</strong>
+            </a>
+
+            <p>
+                Track smarter. Spend mindfully. Build better financial habits.
+            </p>
         </div>
 
-        <div class="card">
-            <h3>📊 Highest Category</h3>
-            <p id="category">Loading...</p>
+        <div class="analysis-footer-bottom">
+            <span>© 2026 AI Expense Tracker</span>
+
+            <div class="analysis-footer-links">
+                <a href="/privacy-policy.html">Privacy Policy</a>
+                <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+            </div>
         </div>
+    </footer>
 
-        <div class="card">
-            <h3>⚠️ Alert</h3>
-            <p id="alert">Loading...</p>
-        </div>
 
-        <div class="card">
-            <h3>💡 Suggestion</h3>
-            <p id="suggestion">Loading...</p>
-        </div>
+    <!-- EXISTING API INTEGRATION -->
+    <script src="/static/js/ai.js"></script>
 
-    </div>
-
-</div>
-
-<!-- FOOTER -->
-<footer class="footer">
-    <h3>AI Expense Tracker</h3>
-    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
-
-    <div class="contact">
-        <p>📞 +91 9011621636</p>
-        <p>📧 mrpk49227@gmail.com</p>
-        <p>📨 prakash.work@zohomail.in</p>
-    </div>
-     <a href="privacy-policy.html">Privacy Policy</a>
-
-    <a href="terms-and-conditions.html">
-    Terms & Conditions
-    </a>
-
-    <p class="copy">© 2026 AI Expense Tracker</p>
-</footer>
-
-<script src="/static/js/ai.js"></script>
 </body>
 </html>

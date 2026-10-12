@@ -3,121 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+
+    <title>Dashboard | AI Expense Tracker</title>
+    <meta
+        name="description"
+        content="Manage expenses and review your financial summary with AI Expense Tracker."
+    >
 
     <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
-<body>
 
-<!-- HEADER -->
-<header class="header">
-    <div class="left">
-        <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+<body class="dashboard-page">
 
-        <div class="logo">
-            <img src="/static/images/logo.png" alt="Logo">
-            <span>AI Expense Tracker</span>
-        </div>
-    </div>
+    <!-- TOP NAVIGATION -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <button
+                class="menu-btn"
+                id="menuButton"
+                type="button"
+                onclick="toggleSidebar()"
+                aria-label="Open navigation menu"
+                aria-controls="sidebar"
+                aria-expanded="false"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
 
-    <div class="user">
-        Welcome, <span id="username">User</span> 👋
-    </div>
-</header>
-
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-
-    <div class="close-btn" onclick="toggleSidebar()">✖</div>
-
-    <a href="/dashboard-page">🏠 Dashboard</a>
-    <a href="add-expense.html">➕ Add Expense</a>
-    <a href="expenses.html">📋 Expenses</a>
-    <a href="summary.html">📊 Summary</a>
-    <a href="ai.html">🤖 AI Insights</a>
-
-    <!-- ✅ NEW -->
-    <a href="budget.html">💸 Budget</a>
-
-    <a href="#" onclick="logout()">🚪 Logout</a>
-</div>
-
-<!-- MAIN -->
-<main class="main">
-
-    <!-- INTRO -->
-    <section class="intro">
-        <h1>Smart Expense Dashboard</h1>
-        <p>
-            Track, analyze and control your expenses using AI-powered insights. 
-            Stay financially strong and make smarter decisions.
-        </p>
-    </section>
-
-    <!-- CARDS -->
-    <section class="cards">
-        <div class="card">💰 Total Expense: ₹<span id="total">0</span></div>
-        <div class="card">📊 Transactions: <span id="count">0</span></div>
-        <div class="card">📉 Avg Expense: ₹<span id="avg">0</span></div>
-    </section>
-
-    <!-- FEATURES -->
-    <section class="feature-section">
-
-        <div class="feature-box">
-            <h2>➕ Add Expense</h2>
-            <p>Quickly add your daily expenses and track your spending habits.</p>
-            <a href="add-expense.html" class="btn">Go to Add Expense</a>
+            <a href="/dashboard-page" class="brand">
+                <img src="/static/images/logo.png" alt="AI Expense Tracker logo">
+                <span>AI Expense <strong>Tracker</strong></span>
+            </a>
         </div>
 
-        <div class="feature-box">
-            <h2>📋 View Expenses</h2>
-            <p>View all your transactions and monitor your financial activity.</p>
-            <a href="expenses.html" class="btn">View Expenses</a>
+        <div class="header-right">
+            <span class="secure-indicator">
+                <span class="secure-dot"></span>
+                Personal Dashboard
+            </span>
+
+            <div class="user-avatar" aria-hidden="true">U</div>
+        </div>
+    </header>
+
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+
+        <div class="sidebar-top">
+            <span class="sidebar-label">WORKSPACE</span>
+
+            <button
+                type="button"
+                class="close-btn"
+                onclick="toggleSidebar()"
+                aria-label="Close navigation menu"
+            >×</button>
         </div>
 
-        <div class="feature-box">
-            <h2>📊 Summary</h2>
-            <p>Analyze your total spending, averages, and trends.</p>
-            <a href="summary.html" class="btn">View Summary</a>
+        <nav class="sidebar-nav">
+            <a href="/dashboard-page" class="nav-item active" aria-current="page">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/add-expense.html" class="nav-item">
+                <span class="nav-icon">＋</span>
+                <span>Add Expense</span>
+            </a>
+
+            <a href="/expenses.html" class="nav-item">
+                <span class="nav-icon">▤</span>
+                <span>All Expenses</span>
+            </a>
+
+            <a href="/summary.html" class="nav-item">
+                <span class="nav-icon">▥</span>
+                <span>Summary & Reports</span>
+            </a>
+
+            <a href="/ai.html" class="nav-item">
+                <span class="nav-icon">✧</span>
+                <span>AI Insights</span>
+                <span class="nav-tag">AI</span>
+            </a>
+
+            <a href="/budget.html" class="nav-item">
+                <span class="nav-icon">◎</span>
+                <span>Budget Manager</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <span class="help-icon">✦</span>
+                <h3>Spend smarter</h3>
+                <p>Small steps today can build better money habits.</p>
+                <a href="/ai.html">Explore AI insights →</a>
+            </div>
+
+            <button type="button" class="logout-btn" onclick="logout()">
+                <span class="nav-icon">↪</span>
+                Log out
+            </button>
         </div>
+    </aside>
 
-        <div class="feature-box">
-            <h2>🤖 AI Insights</h2>
-            <p>Get smart suggestions, alerts, and predictions using AI.</p>
-            <a href="ai.html" class="btn">View AI Insights</a>
-        </div>
+    <!-- MAIN CONTENT -->
+    <main class="dashboard-main">
 
-        <!-- ✅ NEW FEATURE -->
-        <div class="feature-box">
-            <h2>💸 Budget Management</h2>
-            <p>Set monthly budgets and get alerts when you exceed your limit.</p>
-            <a href="budget.html" class="btn">Manage Budget</a>
-        </div>
+        <!-- WELCOME -->
+        <section class="welcome-section">
+            <div>
+                <div class="section-eyebrow">
+                    <span class="status-dot"></span>
+                    YOUR FINANCIAL SPACE
+                </div>
 
-    </section>
+                <h1>Welcome back, <span id="username">User</span> 👋</h1>
 
-</main>
+                <p>
+                    Keep track of your spending, understand your habits,
+                    and take the next step toward smarter savings.
+                </p>
+            </div>
 
-<!-- FOOTER -->
-<footer class="footer">
-    <h3>AI Expense Tracker</h3>
-    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
+            <a href="/add-expense.html" class="primary-btn">
+                <span>＋</span> Add New Expense
+            </a>
+        </section>
 
-    <div class="contact">
-        <p>📞 +91 9011621636</p>
-        <p>📧 mrpk49227@gmail.com</p>
-        <p>📨 prakash.work@zohomail.in</p>
-    </div>
-    <a href="privacy-policy.html">Privacy Policy</a>
+        <!-- SUMMARY CARDS -->
+        <section class="summary-section" aria-label="Expense overview">
 
-    <a href="terms-and-conditions.html">
-    Terms & Conditions
-    </a>
+            <div class="summary-card total-card">
+                <div class="summary-card-top">
+                    <span class="summary-icon purple-icon">₹</span>
+                    <span class="card-label">ALL-TIME OVERVIEW</span>
+                </div>
 
-    <p class="copy">© 2026 AI Expense Tracker</p>
-</footer>
+                <p class="summary-title">Total Expense</p>
 
-<script src="/static/js/dashboard.js"></script>
+                <h2>₹ <span id="total">0</span></h2>
+
+                <p class="summary-caption">
+                    <span class="caption-dot purple-dot"></span>
+                    Your recorded spending
+                </p>
+
+                <div class="card-decoration decoration-purple"></div>
+            </div>
+
+            <div class="summary-card transactions-card">
+                <div class="summary-card-top">
+                    <span class="summary-icon teal-icon">▤</span>
+                    <span class="card-label">ACTIVITY</span>
+                </div>
+
+                <p class="summary-title">Transactions</p>
+
+                <h2><span id="count">0</span></h2>
+
+                <p class="summary-caption">
+                    <span class="caption-dot teal-dot"></span>
+                    Recorded expense entries
+                </p>
+
+                <div class="card-decoration decoration-teal"></div>
+            </div>
+
+            <div class="summary-card average-card">
+                <div class="summary-card-top">
+                    <span class="summary-icon blue-icon">↗</span>
+                    <span class="card-label">SPENDING SNAPSHOT</span>
+                </div>
+
+                <p class="summary-title">Average Expense</p>
+
+                <h2>₹ <span id="avg">0</span></h2>
+
+                <p class="summary-caption">
+                    <span class="caption-dot blue-dot"></span>
+                    Average per transaction
+                </p>
+
+                <div class="card-decoration decoration-blue"></div>
+            </div>
+
+        </section>
+
+        <!-- QUICK ACTIONS -->
+        <section class="workspace-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-eyebrow">YOUR WORKSPACE</span>
+                    <h2>Manage your money</h2>
+                    <p>Everything you need, organized in one place.</p>
+                </div>
+
+                <span class="workspace-mark">✦ SMART FINANCE</span>
+            </div>
+
+            <div class="feature-grid">
+
+                <article class="feature-card feature-add">
+                    <div class="feature-card-top">
+                        <div class="feature-icon icon-purple">＋</div>
+                        <span class="feature-arrow">↗</span>
+                    </div>
+
+                    <h3>Add an expense</h3>
+                    <p>
+                        Record a purchase or daily expense and keep
+                        your financial history organized.
+                    </p>
+
+                    <a href="/add-expense.html" class="feature-link">
+                        Add expense <span>→</span>
+                    </a>
+                </article>
+
+                <article class="feature-card feature-expenses">
+                    <div class="feature-card-top">
+                        <div class="feature-icon icon-teal">▤</div>
+                        <span class="feature-arrow">↗</span>
+                    </div>
+
+                    <h3>All expenses</h3>
+                    <p>
+                        Review your recorded expenses and manage
+                        your transaction history.
+                    </p>
+
+                    <a href="/expenses.html" class="feature-link">
+                        View expenses <span>→</span>
+                    </a>
+                </article>
+
+                <article class="feature-card feature-summary">
+                    <div class="feature-card-top">
+                        <div class="feature-icon icon-blue">▥</div>
+                        <span class="feature-arrow">↗</span>
+                    </div>
+
+                    <h3>Summary & reports</h3>
+                    <p>
+                        Explore your spending summary and use reports
+                        to understand your finances.
+                    </p>
+
+                    <a href="/summary.html" class="feature-link">
+                        View summary <span>→</span>
+                    </a>
+                </article>
+
+                <article class="feature-card feature-ai">
+                    <div class="feature-card-top">
+                        <div class="feature-icon icon-pink">✧</div>
+                        <span class="feature-badge">AI</span>
+                    </div>
+
+                    <h3>AI insights</h3>
+                    <p>
+                        Explore the available spending analysis,
+                        insights, and suggestions.
+                    </p>
+
+                    <a href="/ai.html" class="feature-link">
+                        Explore insights <span>→</span>
+                    </a>
+                </article>
+
+                <article class="feature-card feature-budget">
+                    <div class="feature-card-top">
+                        <div class="feature-icon icon-orange">◎</div>
+                        <span class="feature-arrow">↗</span>
+                    </div>
+
+                    <h3>Budget manager</h3>
+                    <p>
+                        Manage your monthly budget and check whether
+                        your spending stays within your limit.
+                    </p>
+
+                    <a href="/budget.html" class="feature-link">
+                        Manage budget <span>→</span>
+                    </a>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- BOTTOM NOTE -->
+        <section class="dashboard-note">
+            <div class="note-icon">✦</div>
+
+            <div>
+                <h3>Better money habits start with awareness.</h3>
+                <p>
+                    Add expenses regularly so your dashboard can reflect
+                    the information recorded in your account.
+                </p>
+            </div>
+
+            <a href="/add-expense.html">Get started →</a>
+        </section>
+
+        <footer class="dashboard-footer">
+            <span>© 2026 AI Expense Tracker</span>
+
+            <div>
+                <a href="/privacy-policy.html">Privacy Policy</a>
+                <a href="/terms-and-conditions.html">Terms & Conditions</a>
+            </div>
+
+            <span>Plan smart. Spend wisely.</span>
+        </footer>
+
+    </main>
+
+    <!-- Existing dashboard logic -->
+    <script src="/static/js/dashboard.js"></script>
+
+    <!-- Sidebar interactions; no changes to API or expense logic -->
+    <script>
+        const dashboardSidebar = document.getElementById("sidebar");
+        const dashboardMenuButton = document.getElementById("menuButton");
+        const dashboardOverlay = document.getElementById("sidebarOverlay");
+
+        function setDashboardSidebar(open) {
+            dashboardSidebar.classList.toggle("sidebar-open", open);
+            dashboardOverlay.classList.toggle("overlay-visible", open);
+
+            dashboardMenuButton.setAttribute(
+                "aria-expanded",
+                String(open)
+            );
+        }
+
+        // Override the previous visual toggle while preserving its function name.
+        function toggleSidebar() {
+            const isOpen =
+                dashboardSidebar.classList.contains("sidebar-open");
+
+            setDashboardSidebar(!isOpen);
+        }
+
+        dashboardMenuButton.addEventListener("click", function () {
+            // The inline handler already calls toggleSidebar().
+            // This listener is intentionally not needed.
+        });
+
+        dashboardOverlay.addEventListener("click", function () {
+            setDashboardSidebar(false);
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                setDashboardSidebar(false);
+            }
+        });
+
+        // Close the mobile sidebar after selecting a destination.
+        dashboardSidebar.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                setDashboardSidebar(false);
+            });
+        });
+    </script>
+
 </body>
 </html>

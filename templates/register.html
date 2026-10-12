@@ -2,43 +2,239 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - AI Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | AI Expense Tracker</title>
+    <meta
+        name="description"
+        content="Create your AI Expense Tracker account to manage your expenses."
+    >
 
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/register.css">
 </head>
-<body>
 
-<!-- NAVBAR -->
-<nav class="navbar">
-   <div class="logo">
-    <img src="/static/images/logo.png" alt="Logo">
-    <span>AI Expense Tracker</span>
-</div>
-</nav>
+<body class="register-page">
 
-<!-- REGISTER FORM -->
-<div class="container">
-    <div class="form-box">
-        <h2>Create Account</h2>
-        <p>Start managing your expenses smartly</p>
+    <!-- Navbar -->
+    <nav class="navbar register-navbar">
+        <a class="brand" href="/" aria-label="AI Expense Tracker Home">
+            <img src="/static/images/logo.png" alt="AI Expense Tracker logo">
+            <span>AI Expense <strong>Tracker</strong></span>
+        </a>
 
-        <form id="registerForm">
-            <input type="text" id="name" placeholder="Full Name" required>
-            <input type="email" id="email" placeholder="Email Address" required>
-            <input type="password" id="password" placeholder="Password" required>
+        <a href="/login-page" class="nav-login">
+            Already a member? <strong>Sign in</strong>
+        </a>
+    </nav>
 
-            <button type="submit">Register</button>
-        </form>
+    <!-- Main Registration Section -->
+    <main class="register-main">
 
-        <p class="login-link">
-            Already have an account? <a href="/login-page">Login</a>
-        </p>
-    </div>
-</div>
+        <!-- Left: Brand Introduction -->
+        <section class="register-intro">
+            <div class="intro-badge">
+                <span class="status-dot"></span>
+                SMART MONEY MANAGEMENT
+            </div>
+
+            <h1>
+                Start your journey<br>
+                toward <span>smarter savings.</span>
+            </h1>
+
+            <p class="intro-description">
+                Create your account and bring your income, expenses,
+                and savings goals together in one simple dashboard.
+            </p>
+
+            <div class="benefit-list">
+                <div class="benefit-item">
+                    <span class="benefit-icon">↗</span>
+                    <div>
+                        <h3>Track every expense</h3>
+                        <p>Keep your daily spending organized.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <span class="benefit-icon">✦</span>
+                    <div>
+                        <h3>AI-powered insights</h3>
+                        <p>Understand spending patterns and trends.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <span class="benefit-icon">◎</span>
+                    <div>
+                        <h3>Build better habits</h3>
+                        <p>Make informed decisions about your money.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decorative illustration, not live account data -->
+            <div class="preview-card" aria-hidden="true">
+                <div class="preview-top">
+                    <div>
+                        <span class="preview-label">YOUR FINANCIAL FUTURE</span>
+                        <h3>Small steps. Better habits.</h3>
+                    </div>
+                    <span class="preview-star">✦</span>
+                </div>
+
+                <div class="preview-bars">
+                    <span style="height: 32%"></span>
+                    <span style="height: 52%"></span>
+                    <span style="height: 42%"></span>
+                    <span style="height: 72%"></span>
+                    <span style="height: 58%"></span>
+                    <span style="height: 88%"></span>
+                    <span style="height: 68%"></span>
+                </div>
+
+                <div class="preview-bottom">
+                    <span>Plan thoughtfully</span>
+                    <span>Save consistently ↗</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Registration Form -->
+        <section class="register-form-section">
+            <div class="register-card">
+
+                <div class="card-icon">✦</div>
+
+                <div class="card-heading">
+                    <span class="eyebrow">CREATE YOUR ACCOUNT</span>
+                    <h2>Join AI Expense Tracker</h2>
+                    <p>Enter your details to get started.</p>
+                </div>
+
+                <form id="registerForm">
+
+                    <div class="field-group">
+                        <label for="name">Full name</label>
+
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">♙</span>
+
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                placeholder="Enter your full name"
+                                autocomplete="name"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="email">Email address</label>
+
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">✉</span>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="password">Password</label>
+
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">♙</span>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Create a password"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
+                                Show
+                            </button>
+                        </div>
+
+                        <p class="field-hint">
+                            Choose a strong password that you don't use elsewhere.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="create-account-btn">
+                        Create Account <span aria-hidden="true">→</span>
+                    </button>
+
+                </form>
+
+                <div class="form-divider">
+                    <span>YOUR FINANCES, ORGANIZED</span>
+                </div>
+
+                <p class="login-link">
+                    Already have an account?
+                    <a href="/login-page">Sign in here</a>
+                </p>
+
+                <p class="security-note">
+                    <span aria-hidden="true">◇</span>
+                    Your account details are sent to the existing registration API.
+                </p>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="register-footer">
+        <span>© AI Expense Tracker</span>
+        <span>Plan smart. Spend wisely.</span>
+    </footer>
+
+    <!-- Keep existing registration and login logic -->
+    <script src="/static/js/auth.js"></script>
+
+    <!-- Password visibility toggle only -->
+    <script>
+        const passwordInput = document.getElementById("password");
+        const toggleButton = document.getElementById("togglePassword");
+
+        toggleButton.addEventListener("click", function () {
+            const showPassword = passwordInput.type === "password";
+
+            passwordInput.type = showPassword ? "text" : "password";
+            toggleButton.textContent = showPassword ? "Hide" : "Show";
+
+            toggleButton.setAttribute(
+                "aria-label",
+                showPassword ? "Hide password" : "Show password"
+            );
+
+            toggleButton.setAttribute(
+                "aria-pressed",
+                String(showPassword)
+            );
+        });
+    </script>
 
 </body>
-
-<script src="/static/js/auth.js"></script>
-
 </html>
