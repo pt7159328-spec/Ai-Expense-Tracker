@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Receipt Scanner | AI Expense Tracker</title>
+
+    <meta
+        name="description"
+        content="Upload a receipt and prepare your expense details for AI-powered receipt scanning with AI Expense Tracker."
+    >
+
+    <meta name="theme-color" content="#f5f7fc">
+
+    <!-- Shared website styles -->
+    <link rel="stylesheet" href="/static/css/common.css">
+
+    <!-- Receipt Scanner page styles -->
+    <link rel="stylesheet" href="/static/css/receipt-scanner.css">
+</head>
+
+<body class="receipt-scanner-page">
+
+    <!-- HEADER -->
+    <header class="expense-header">
+        <a
+            href="/dashboard-page"
+            class="expense-brand"
+            aria-label="AI Expense Tracker home"
+        >
+            <img
+                src="/static/images/logo.png"
+                alt="AI Expense Tracker logo"
+            >
+
+            <span>AI Expense <strong>Tracker</strong></span>
+        </a>
+
+        <a href="/dashboard-page" class="back-dashboard">
+            <span aria-hidden="true">←</span>
+            <span>Back to Dashboard</span>
+        </a>
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="receipt-main">
+
+        <!-- INTRODUCTION -->
+        <section class="receipt-intro" aria-labelledby="receiptPageTitle">
+
+            <div class="receipt-intro-content">
+
+                <div class="receipt-eyebrow">
+                    <span class="receipt-status-dot"></span>
+                    SMART EXPENSE MANAGEMENT
+                </div>
+
+                <h1 id="receiptPageTitle">
+                    Your receipts.<br>
+                    <span>Smarter expense tracking.</span>
+                </h1>
+
+                <p class="receipt-intro-description">
+                    Upload a receipt to get started. The scanner workflow
+                    will prepare the receipt for processing and help you
+                    review the expense details before saving them.
+                </p>
+
+                <div class="receipt-benefits">
+
+                    <div class="receipt-benefit">
+                        <span
+                            class="receipt-benefit-icon purple-icon"
+                            aria-hidden="true"
+                        >▤</span>
+
+                        <div>
+                            <h2>Upload a receipt</h2>
+                            <p>
+                                Select a clear image of your bill or receipt.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="receipt-benefit">
+                        <span
+                            class="receipt-benefit-icon teal-icon"
+                            aria-hidden="true"
+                        >✦</span>
+
+                        <div>
+                            <h2>Prepare expense details</h2>
+                            <p>
+                                Get ready to review the information extracted
+                                from your receipt.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="receipt-benefit">
+                        <span
+                            class="receipt-benefit-icon blue-icon"
+                            aria-hidden="true"
+                        >₹</span>
+
+                        <div>
+                            <h2>Review before saving</h2>
+                            <p>
+                                Check the expense information before it is
+                                added to your records.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <aside class="receipt-tip" aria-label="Receipt scanning tip">
+                <span class="receipt-tip-icon" aria-hidden="true">✦</span>
+
+                <div>
+                    <span class="receipt-tip-label">SCANNING TIP</span>
+
+                    <p>
+                        Keep the receipt flat, well-lit and fully visible
+                        for better text recognition.
+                    </p>
+                </div>
+            </aside>
+
+        </section>
+
+
+        <!-- SCANNER WORKSPACE -->
+        <section class="receipt-workspace" aria-labelledby="uploadHeading">
+
+            <div class="receipt-card">
+
+                <div class="receipt-card-header">
+
+                    <div class="receipt-card-heading-icon" aria-hidden="true">
+                        ▤
+                    </div>
+
+                    <div>
+                        <span class="receipt-section-eyebrow">
+                            SMART RECEIPT SCANNER
+                        </span>
+
+                        <h2 id="uploadHeading">Upload your receipt</h2>
+
+                        <p>
+                            Choose an image of your receipt to begin.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="receipt-divider"></div>
+
+
+                <!-- UPLOAD FORM -->
+                <form
+                    id="receiptUploadForm"
+                    enctype="multipart/form-data"
+                    novalidate
+                >
+
+                    <div
+                        class="receipt-dropzone"
+                        id="receiptDropzone"
+                    >
+
+                        <div
+                            class="receipt-upload-icon"
+                            aria-hidden="true"
+                        >
+                            ↑
+                        </div>
+
+                        <h3>Choose a receipt image</h3>
+
+                        <p>
+                            Select an image from your device to continue.
+                        </p>
+
+                        <label
+                            for="receiptFile"
+                            class="receipt-select-button"
+                        >
+                            Choose Image
+                        </label>
+
+                        <input
+                            type="file"
+                            id="receiptFile"
+                            name="receipt"
+                            accept="image/jpeg,image/png,image/webp"
+                            aria-describedby="receiptFileHelp receiptFileError"
+                            required
+                        >
+
+                        <p class="receipt-file-help" id="receiptFileHelp">
+                            Supported formats: JPG, PNG and WEBP.
+                        </p>
+
+                    </div>
+
+
+                    <!-- FILE VALIDATION MESSAGE -->
+                    <p
+                        class="receipt-file-error"
+                        id="receiptFileError"
+                        role="alert"
+                        hidden
+                    ></p>
+
+
+                    <!-- SELECTED FILE INFORMATION -->
+                    <section
+                        class="receipt-selected-file"
+                        id="selectedFileSection"
+                        aria-labelledby="selectedFileHeading"
+                        hidden
+                    >
+
+                        <div class="receipt-selected-file-header">
+                            <div>
+                                <span class="receipt-section-eyebrow">
+                                    SELECTED FILE
+                                </span>
+
+                                <h3 id="selectedFileHeading">
+                                    Receipt preview
+                                </h3>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="receipt-remove-button"
+                                id="removeReceiptButton"
+                            >
+                                Remove
+                            </button>
+                        </div>
+
+                        <div class="receipt-preview-layout">
+
+                            <div class="receipt-preview-image-wrap">
+                                <img
+                                    id="receiptPreview"
+                                    class="receipt-preview-image"
+                                    src=""
+                                    alt="Preview of the selected receipt"
+                                >
+                            </div>
+
+                            <div class="receipt-file-details">
+                                <p
+                                    class="receipt-file-name"
+                                    id="receiptFileName"
+                                ></p>
+
+                                <p
+                                    class="receipt-file-size"
+                                    id="receiptFileSize"
+                                ></p>
+
+                                <p class="receipt-file-ready">
+                                    <span aria-hidden="true">●</span>
+                                    Image selected
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- PROCESSING STATUS -->
+                    <div
+                        class="receipt-processing-status"
+                        id="receiptStatus"
+                        role="status"
+                        aria-live="polite"
+                        hidden
+                    ></div>
+
+
+                    <!-- ACTIONS -->
+                    <div class="receipt-actions">
+
+                        <button
+                            type="submit"
+                            class="receipt-primary-button"
+                            id="scanReceiptButton"
+                        >
+                            <span aria-hidden="true">✦</span>
+                            Scan Receipt
+                        </button>
+
+                        <button
+                            type="reset"
+                            class="receipt-secondary-button"
+                            id="resetReceiptButton"
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+                    <p class="receipt-privacy-note">
+                        Review the extracted information before saving
+                        an expense. Only upload receipts you are authorized
+                        to share.
+                    </p>
+
+                </form>
+
+            </div>
+
+
+            <!-- EXTRACTION RESULTS -->
+            <section
+                class="receipt-results-card"
+                id="receiptResults"
+                aria-labelledby="receiptResultsHeading"
+                hidden
+            >
+
+                <div class="receipt-card-header">
+
+                    <div
+                        class="receipt-card-heading-icon"
+                        aria-hidden="true"
+                    >
+                        ✓
+                    </div>
+
+                    <div>
+                        <span class="receipt-section-eyebrow">
+                            EXTRACTED INFORMATION
+                        </span>
+
+                        <h2 id="receiptResultsHeading">
+                            Review expense details
+                        </h2>
+
+                        <p>
+                            Check the information carefully before continuing.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="receipt-divider"></div>
+
+                <form id="receiptExpenseForm">
+
+                    <div class="receipt-fields-grid">
+
+                        <div class="receipt-field">
+                            <label for="merchantName">
+                                Merchant / Store
+                            </label>
+
+                            <input
+                                type="text"
+                                id="merchantName"
+                                name="merchant"
+                                maxlength="150"
+                                autocomplete="organization"
+                                placeholder="Merchant name"
+                            >
+                        </div>
+
+                        <div class="receipt-field">
+                            <label for="receiptDate">
+                                Receipt Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="receiptDate"
+                                name="date"
+                            >
+                        </div>
+
+                        <div class="receipt-field">
+                            <label for="receiptAmount">
+                                Total Amount (₹)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="receiptAmount"
+                                name="amount"
+                                min="0.01"
+                                step="0.01"
+                                inputmode="decimal"
+                                placeholder="0.00"
+                            >
+                        </div>
+
+                        <div class="receipt-field">
+                            <label for="receiptCategory">
+                                Expense Category
+                            </label>
+
+                            <input
+                                type="text"
+                                id="receiptCategory"
+                                name="category"
+                                list="receiptCategories"
+                                maxlength="60"
+                                placeholder="e.g. Food, Shopping"
+                            >
+
+                            <datalist id="receiptCategories">
+                                <option value="Food"></option>
+                                <option value="Travel"></option>
+                                <option value="Shopping"></option>
+                                <option value="Education"></option>
+                                <option value="Healthcare"></option>
+                                <option value="Bills"></option>
+                                <option value="Entertainment"></option>
+                                <option value="Groceries"></option>
+                                <option value="Transport"></option>
+                                <option value="Other"></option>
+                            </datalist>
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="receipt-results-status"
+                        id="receiptResultsStatus"
+                        role="status"
+                        aria-live="polite"
+                        hidden
+                    ></div>
+
+                    <div class="receipt-actions">
+
+                        <button
+                            type="submit"
+                            class="receipt-primary-button"
+                            id="saveReceiptExpenseButton"
+                        >
+                            Save Expense
+                        </button>
+
+                        <a
+                            href="/expenses.html"
+                            class="receipt-secondary-button"
+                        >
+                            View Expenses
+                        </a>
+
+                    </div>
+
+                    <p class="receipt-results-note">
+                        Please verify all extracted values. The details
+                        shown here must be processed by the scanner
+                        integration before they can be saved.
+                    </p>
+
+                </form>
+
+            </section>
+
+        </section>
+
+
+        <!-- WORKFLOW INFORMATION -->
+        <section
+            class="receipt-workflow"
+            aria-labelledby="workflowHeading"
+        >
+
+            <div class="receipt-workflow-heading">
+                <span class="receipt-section-eyebrow">
+                    HOW IT WORKS
+                </span>
+
+                <h2 id="workflowHeading">
+                    From receipt to expense
+                </h2>
+
+                <p>
+                    A simple workflow to help keep your expense records
+                    organized.
+                </p>
+            </div>
+
+            <div class="receipt-workflow-grid">
+
+                <article class="receipt-workflow-step">
+                    <span class="receipt-step-number">01</span>
+
+                    <h3>Upload</h3>
+
+                    <p>
+                        Select a clear image of your receipt.
+                    </p>
+                </article>
+
+                <article class="receipt-workflow-step">
+                    <span class="receipt-step-number">02</span>
+
+                    <h3>Scan and review</h3>
+
+                    <p>
+                        Process the image and verify the extracted details.
+                    </p>
+                </article>
+
+                <article class="receipt-workflow-step">
+                    <span class="receipt-step-number">03</span>
+
+                    <h3>Save</h3>
+
+                    <p>
+                        Save the verified expense when the integration
+                        is ready.
+                    </p>
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="receipt-footer">
+        <p>
+            © <span id="currentYear">2026</span> AI Expense Tracker.
+            Smart money management.
+        </p>
+
+        <div class="receipt-footer-links">
+            <a href="/privacy-policy.html">Privacy Policy</a>
+            <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+            <a href="/dashboard-page">Dashboard</a>
+        </div>
+    </footer>
+
+
+    <!-- Receipt Scanner behavior will be added in its JavaScript file. -->
+    <script src="/static/js/receipt-scanner.js" defer></script>
+
+</body>
+</html>

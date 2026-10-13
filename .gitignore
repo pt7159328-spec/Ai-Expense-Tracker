@@ -1,11 +1,38 @@
+# Python cache and compiled files
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Local environment files and secrets
 .env
+.env.*
+!.env.example
+
+# Python virtual environments
 venv/
+env/
+.venv/
+
+# Generated application reports
 expense_report.pdf
-*.pyo
-*.pyd
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build and distribution artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# IDE and editor settings
 .idea/
 .vscode/
+
+# Operating system files
 .DS_Store
 Thumbs.db

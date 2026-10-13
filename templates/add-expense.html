@@ -3,258 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Add Expense | AI Expense Tracker</title>
-    <meta
-        name="description"
-        content="Add and record your expenses with AI Expense Tracker."
-    >
+    <title>Add Expense</title>
 
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/add-expense.css">
 </head>
+<body>
 
-<body class="add-expense-page">
+<header class="header">
+    <div class="header-left">
+        <img src="/static/images/logo.png" alt="Logo">
+        <h2>AI Expense Tracker</h2>
+    </div>
 
-    <!-- HEADER -->
-    <header class="expense-header">
-        <a href="/dashboard-page" class="expense-brand">
-            <img src="/static/images/logo.png" alt="AI Expense Tracker logo">
-            <span>AI Expense <strong>Tracker</strong></span>
-        </a>
+    <div class="header-right">
+        <a href="/dashboard-page" class="back-btn">← Dashboard</a>
+    </div>
+</header>
 
-        <a href="/dashboard-page" class="back-dashboard">
-            <span aria-hidden="true">←</span>
-            <span>Back to Dashboard</span>
-        </a>
-    </header>
+<main class="container">
+    <div class="form-box">
+        <h2>🧾 Smart Receipt Scanner</h2>
+        <p>Select a receipt image or PDF to extract its details automatically.</p>
 
-    <!-- MAIN CONTENT -->
-    <main class="expense-main">
+        <form id="receiptScanForm">
+            <label for="receiptFile">Choose receipt image or PDF</label>
+            <input
+                type="file"
+                id="receiptFile"
+                name="file"
+                accept=".jpg,.jpeg,.png,.webp,.bmp,.tif,.tiff,.pdf,image/jpeg,image/png,image/webp,application/pdf"
+                required
+            >
+            <p id="receiptFileHint">Supported: JPG, JPEG, PNG, WEBP, BMP, TIFF and PDF · Maximum 10 MB</p>
+            <button type="submit" id="scanReceiptBtn">Scan Receipt</button>
+        </form>
 
-        <!-- INTRODUCTION -->
-        <section class="expense-intro">
-            <div class="intro-badge">
-                <span class="status-dot"></span>
-                SMART MONEY MANAGEMENT
-            </div>
+        <p id="receiptScanStatus" role="status" aria-live="polite"></p>
 
-            <h1>
-                Every expense<br>
-                tells a <span>story.</span>
-            </h1>
+        <section id="receiptResult" hidden aria-live="polite">
+            <h3>Extracted Receipt Details</h3>
+            <p><strong>Merchant:</strong> <span id="receiptMerchant">Not detected</span></p>
+            <p><strong>Amount:</strong> <span id="receiptAmount">Not detected</span></p>
+            <p><strong>Currency:</strong> <span id="receiptCurrency">Not detected</span></p>
+            <p><strong>Date:</strong> <span id="receiptDate">Not detected</span></p>
+            <p><strong>Status:</strong> <span id="receiptStatus">Not detected</span></p>
 
-            <p class="intro-description">
-                Record your spending today. A clear record of your
-                expenses can help you understand your money habits
-                and make better financial decisions.
-            </p>
+            <h4>Detected Items</h4>
+            <ul id="receiptItems"><li>No items detected.</li></ul>
 
-            <div class="expense-benefits">
-
-                <div class="benefit-row">
-                    <span class="benefit-icon purple-icon">₹</span>
-                    <div>
-                        <h3>Keep it organized</h3>
-                        <p>Record amounts and categories in one place.</p>
-                    </div>
-                </div>
-
-                <div class="benefit-row">
-                    <span class="benefit-icon teal-icon">▤</span>
-                    <div>
-                        <h3>Build your expense history</h3>
-                        <p>Save entries with their currency and date.</p>
-                    </div>
-                </div>
-
-                <div class="benefit-row">
-                    <span class="benefit-icon blue-icon">↗</span>
-                    <div>
-                        <h3>Understand your spending</h3>
-                        <p>Use your recorded expenses for future reviews.</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="expense-tip">
-                <div class="tip-icon">✦</div>
-                <div>
-                    <span class="tip-label">A SMALL MONEY HABIT</span>
-                    <p>Record an expense soon after you make it.</p>
-                </div>
-            </div>
+            <h4>Review Warnings</h4>
+            <ul id="receiptWarnings"><li>No warnings.</li></ul>
+            <p id="receiptExpenseStatus"></p>
         </section>
+    </div>
 
-        <!-- FORM -->
-        <section class="expense-form-section">
+    <div class="form-box">
+        <h2>➕ Add New Expense</h2>
+        <p>You can still add an expense manually using this form.</p>
+        <form id="expenseForm">
+            <input type="number" id="amount" placeholder="Enter Amount" min="0.01" step="0.01" required>
+            <input type="text" id="category" placeholder="Category (Food, Travel...)" required>
 
-            <div class="expense-form-card">
+            <select id="currency" required>
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="AED">AED (د.إ)</option>
+            </select>
 
-                <div class="form-card-header">
-                    <div class="form-heading-icon">＋</div>
+            <input type="date" id="date" required>
+            <button type="submit">Add Expense</button>
+        </form>
+    </div>
 
-                    <div>
-                        <span class="form-eyebrow">NEW TRANSACTION</span>
-                        <h2>Add an expense</h2>
-                        <p>Enter the details below to record your spending.</p>
-                    </div>
-                </div>
+    <div class="form-box">
+        <h2>📋 Receipt History</h2>
+        <p>Recently scanned receipts for your account.</p>
+        <button type="button" id="refreshReceiptsBtn">Refresh History</button>
+        <p id="receiptHistoryStatus" role="status" aria-live="polite"></p>
+        <ul id="receiptHistoryList"><li>Sign in to load your receipt history.</li></ul>
 
-                <div class="form-divider"></div>
-
-                <form id="expenseForm">
-
-                    <!-- AMOUNT -->
-                    <div class="field-group amount-group">
-                        <label for="amount">Expense amount</label>
-
-                        <div class="amount-input-wrap">
-                            <span class="amount-symbol" aria-hidden="true">₹</span>
-
-                            <input
-                                type="number"
-                                id="amount"
-                                name="amount"
-                                placeholder="0.00"
-                                min="0.01"
-                                step="0.01"
-                                inputmode="decimal"
-                                required
-                            >
-                        </div>
-
-                        <p class="field-hint">
-                            Enter an amount greater than zero.
-                        </p>
-                    </div>
-
-                    <!-- CATEGORY -->
-                    <div class="field-group">
-                        <label for="category">Expense category</label>
-
-                        <div class="standard-input-wrap">
-                            <span class="field-icon" aria-hidden="true">▤</span>
-
-                            <input
-                                type="text"
-                                id="category"
-                                name="category"
-                                list="expenseCategories"
-                                placeholder="e.g. Food, Travel, Shopping"
-                                maxlength="60"
-                                autocomplete="off"
-                                required
-                            >
-                        </div>
-
-                        <datalist id="expenseCategories">
-                            <option value="Food"></option>
-                            <option value="Travel"></option>
-                            <option value="Shopping"></option>
-                            <option value="Education"></option>
-                            <option value="Healthcare"></option>
-                            <option value="Bills"></option>
-                            <option value="Entertainment"></option>
-                            <option value="Groceries"></option>
-                            <option value="Transport"></option>
-                            <option value="Other"></option>
-                        </datalist>
-
-                        <p class="field-hint">
-                            Choose a suggestion or type your own category.
-                        </p>
-                    </div>
-
-                    <!-- CURRENCY -->
-                    <div class="field-group">
-                        <label for="currency">Currency</label>
-
-                        <div class="standard-input-wrap">
-                            <span class="field-icon" aria-hidden="true">◎</span>
-
-                            <select id="currency" name="currency" required>
-                                <option value="INR" selected>INR — Indian Rupee (₹)</option>
-                                <option value="USD">USD — US Dollar ($)</option>
-                                <option value="EUR">EUR — Euro (€)</option>
-                                <option value="GBP">GBP — British Pound (£)</option>
-                                <option value="AED">AED — UAE Dirham (د.إ)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- DATE -->
-                    <div class="field-group">
-                        <label for="date">Expense date</label>
-
-                        <div class="standard-input-wrap">
-                            <span class="field-icon" aria-hidden="true">▦</span>
-
-                            <input
-                                type="date"
-                                id="date"
-                                name="date"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <!-- SUBMIT -->
-                    <button type="submit" class="save-expense-btn">
-                        <span>＋</span>
-                        Add Expense
-                        <span class="button-arrow" aria-hidden="true">→</span>
-                    </button>
-
-                    <p class="form-security-note">
-                        <span aria-hidden="true">◇</span>
-                        Your expense is submitted using your existing login token.
-                    </p>
-
-                </form>
-
-            </div>
-
-            <a href="/expenses.html" class="view-expenses-link">
-                Want to review previous entries?
-                <strong>View all expenses →</strong>
-            </a>
-
-        </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="expense-footer">
-        <span>© 2026 AI Expense Tracker</span>
-
-        <div class="footer-links">
-            <a href="/privacy-policy.html">Privacy Policy</a>
-            <a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+        <hr>
+        <h2>📊 Receipt Insights</h2>
+        <div id="receiptInsights" aria-live="polite">
+            <p>Sign in to load receipt insights.</p>
         </div>
+    </div>
+</main>
 
-        <span>Plan smart. Spend wisely.</span>
-    </footer>
+<footer class="footer">
+    <h3>AI Expense Tracker</h3>
+    <p>Smart financial tracking powered by AI to help you control your money and improve savings.</p>
 
-    <!-- Keep the existing expense API logic -->
-    <script src="/static/js/expense.js"></script>
+    <div class="contact">
+        <p>📞 +91 9011621636</p>
+        <p>📧 mrpk49227@gmail.com</p>
+        <p>📨 prakash.work@zohomail.in</p>
+    </div>
 
-    <!-- Set today's date as the initial date -->
-    <script>
-        const expenseDateInput = document.getElementById("date");
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+    <p class="copy">© 2026 AI Expense Tracker</p>
+</footer>
 
-        if (expenseDateInput && !expenseDateInput.value) {
-            const now = new Date();
-            const localDate = [
-                now.getFullYear(),
-                String(now.getMonth() + 1).padStart(2, "0"),
-                String(now.getDate()).padStart(2, "0")
-            ].join("-");
+<!-- Existing manual expense workflow is preserved. -->
+<script src="/static/js/expense.js"></script>
+<script>
+(function () {
+    "use strict";
 
-            expenseDateInput.value = localDate;
+    const scanForm = document.getElementById("receiptScanForm");
+    const fileInput = document.getElementById("receiptFile");
+    const scanButton = document.getElementById("scanReceiptBtn");
+    const scanStatus = document.getElementById("receiptScanStatus");
+    const resultPanel = document.getElementById("receiptResult");
+    const historyButton = document.getElementById("refreshReceiptsBtn");
+    const historyStatus = document.getElementById("receiptHistoryStatus");
+    const historyList = document.getElementById("receiptHistoryList");
+    const insightsPanel = document.getElementById("receiptInsights");
+
+    const allowedExtensions = new Set(["jpg", "jpeg", "png", "webp", "bmp", "tif", "tiff", "pdf"]);
+    const maxFileBytes = 10 * 1024 * 1024;
+
+    function getToken() {
+        return localStorage.getItem("token");
+    }
+
+    function setText(id, value) {
+        document.getElementById(id).textContent =
+            value === null || value === undefined || value === "" ? "Not detected" : String(value);
+    }
+
+    function addListMessage(list, message) {
+        list.replaceChildren();
+        const item = document.createElement("li");
+        item.textContent = message;
+        list.appendChild(item);
+    }
+
+    function addListItems(list, values, formatter) {
+        list.replaceChildren();
+        if (!Array.isArray(values) || values.length === 0) {
+            addListMessage(list, "None detected.");
+            return;
         }
-    </script>
+        values.forEach(function (value) {
+            const item = document.createElement("li");
+            item.textContent = formatter(value);
+            list.appendChild(item);
+        });
+    }
 
+    async function authenticatedFetch(url, options) {
+        const token = getToken();
+        if (!token) {
+            alert("Please login first.");
+            window.location.href = "/login-page";
+            throw new Error("Authentication required.");
+        }
+        const requestOptions = options || {};
+        requestOptions.headers = Object.assign({}, requestOptions.headers || {}, {
+            "Authorization": "Bearer " + token,
+            "Accept": "application/json"
+        });
+        const response = await fetch(url, requestOptions);
+        if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.removeItem("token");
+            window.location.href = "/login-page";
+            throw new Error("Session expired.");
+        }
+        return response;
+    }
+
+    function renderReceipt(receipt, responseData) {
+        resultPanel.hidden = false;
+        setText("receiptMerchant", receipt.merchant);
+        setText("receiptAmount", receipt.total_amount);
+        setText("receiptCurrency", receipt.currency);
+        setText("receiptDate", receipt.receipt_date);
+        setText("receiptStatus", receipt.status || (responseData.duplicate ? "Duplicate" : "Scanned"));
+
+        addListItems(document.getElementById("receiptItems"), receipt.items, function (item) {
+            const name = item.name || "Unknown item";
+            const quantity = item.quantity ? " × " + item.quantity : "";
+            const lineTotal = item.line_total === null || item.line_total === undefined
+                ? "" : " — " + (receipt.currency || "") + " " + item.line_total;
+            return name + quantity + lineTotal;
+        });
+        addListItems(document.getElementById("receiptWarnings"), responseData.warnings || receipt.warnings,
+            function (warning) { return typeof warning === "string" ? warning : JSON.stringify(warning); });
+
+        const expenseStatus = document.getElementById("receiptExpenseStatus");
+        if (responseData.duplicate) {
+            expenseStatus.textContent = "Duplicate receipt detected. Check the existing receipt; do not submit it again.";
+        } else if (responseData.expense_created) {
+            expenseStatus.textContent = "An expense was created automatically. Review the extracted details and warnings.";
+        } else {
+            expenseStatus.textContent = "Receipt scanned. Check the extracted fields and warnings.";
+        }
+    }
+
+    scanForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
+            scanStatus.textContent = "Please select a receipt image or PDF.";
+            return;
+        }
+        const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "";
+        if (!allowedExtensions.has(extension)) {
+            scanStatus.textContent = "Unsupported file type. Select a supported image or PDF.";
+            return;
+        }
+        if (file.size === 0) {
+            scanStatus.textContent = "The selected file is empty.";
+            return;
+        }
+        if (file.size > maxFileBytes) {
+            scanStatus.textContent = "The file exceeds the 10 MB limit.";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+        scanButton.disabled = true;
+        scanStatus.textContent = "Scanning receipt. Please wait...";
+        resultPanel.hidden = true;
+        try {
+            const response = await authenticatedFetch("/api/receipts/scan", { method: "POST", body: formData });
+            const data = await response.json().catch(function () { return {}; });
+            if (!response.ok) throw new Error(data.msg || "Receipt scan failed.");
+            renderReceipt(data.receipt || data, data);
+            scanStatus.textContent = data.msg || "Receipt scan completed.";
+            await loadReceiptHistory();
+            await loadReceiptInsights();
+        } catch (error) {
+            if (error.message !== "Authentication required." && error.message !== "Session expired.") {
+                scanStatus.textContent = error.message || "Unable to scan this receipt.";
+            }
+        } finally {
+            scanButton.disabled = false;
+        }
+    });
+
+    async function loadReceiptHistory() {
+        historyStatus.textContent = "Loading receipt history...";
+        try {
+            const response = await authenticatedFetch("/api/receipts?limit=20");
+            const data = await response.json().catch(function () { return {}; });
+            if (!response.ok) throw new Error(data.msg || "Could not load receipt history.");
+            const receipts = Array.isArray(data) ? data : (data.receipts || []);
+            historyList.replaceChildren();
+            if (receipts.length === 0) {
+                addListMessage(historyList, "No receipts scanned yet.");
+            } else {
+                receipts.forEach(function (receipt) {
+                    const item = document.createElement("li");
+                    const merchant = receipt.merchant || receipt.original_filename || "Receipt";
+                    const amount = receipt.total_amount === null || receipt.total_amount === undefined
+                        ? "Amount not detected" : (receipt.currency || "") + " " + receipt.total_amount;
+                    item.textContent = merchant + " — " + amount + " — " + (receipt.receipt_date || "Date not detected") +
+                        ((receipt.warnings && receipt.warnings.length) ? " — Needs review" : "");
+                    historyList.appendChild(item);
+                });
+            }
+            historyStatus.textContent = "";
+        } catch (error) {
+            if (error.message !== "Authentication required." && error.message !== "Session expired.") {
+                historyStatus.textContent = error.message || "Could not load receipt history.";
+            }
+        }
+    }
+
+    async function loadReceiptInsights() {
+        insightsPanel.textContent = "Loading receipt insights...";
+        try {
+            const response = await authenticatedFetch("/api/receipts/insights");
+            const data = await response.json().catch(function () { return {}; });
+            if (!response.ok) throw new Error(data.msg || "Could not load receipt insights.");
+            insightsPanel.replaceChildren();
+            [["Receipts scanned", data.receipt_count], ["Total receipt spend", data.receipt_total_spend],
+             ["Items detected", data.items_detected], ["Receipts needing review", data.receipts_needing_review]]
+                .forEach(function (entry) {
+                    const paragraph = document.createElement("p");
+                    const label = document.createElement("strong");
+                    label.textContent = entry[0] + ": ";
+                    paragraph.appendChild(label);
+                    paragraph.appendChild(document.createTextNode(entry[1] === undefined || entry[1] === null ? "0" : String(entry[1])));
+                    insightsPanel.appendChild(paragraph);
+                });
+            const heading = document.createElement("h4");
+            heading.textContent = "Top Items by Spend";
+            insightsPanel.appendChild(heading);
+            const topItemsList = document.createElement("ul");
+            addListItems(topItemsList, data.top_items_by_spend, function (item) {
+                return (item.name || "Unknown item") + " — " + (item.total_spent === undefined ? "Not available" : item.total_spent);
+            });
+            insightsPanel.appendChild(topItemsList);
+        } catch (error) {
+            if (error.message !== "Authentication required." && error.message !== "Session expired.") {
+                insightsPanel.textContent = error.message || "Could not load receipt insights.";
+            }
+        }
+    }
+
+    historyButton.addEventListener("click", async function () {
+        await loadReceiptHistory();
+        await loadReceiptInsights();
+    });
+    if (getToken()) {
+        loadReceiptHistory();
+        loadReceiptInsights();
+    } else {
+        historyStatus.textContent = "Please login to view receipt history.";
+        insightsPanel.textContent = "Please login to view receipt insights.";
+    }
+})();
+</script>
 </body>
 </html>

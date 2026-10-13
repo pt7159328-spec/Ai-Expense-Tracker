@@ -775,3 +775,394 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ================================================================
+   SMART RECEIPT SCANNER ADDITIONS
+   Scoped to the legacy Add Expense markup used by the scanner page.
+   Existing .add-expense-page styles above remain unchanged.
+================================================================ */
+
+body:not(.add-expense-page) {
+    --receipt-bg: #080b16;
+    --receipt-panel: #111729;
+    --receipt-panel-light: #151d32;
+    --receipt-text: #f4f6ff;
+    --receipt-muted: #98a4be;
+    --receipt-teal: #47f0ce;
+    --receipt-purple: #a78bfa;
+    --receipt-border: rgba(174, 190, 230, 0.14);
+    color: var(--receipt-text);
+    background:
+        radial-gradient(ellipse at 12% 20%, rgba(71, 240, 206, 0.08), transparent 35%),
+        radial-gradient(ellipse at 85% 70%, rgba(139, 92, 246, 0.09), transparent 38%),
+        var(--receipt-bg);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+body:not(.add-expense-page) .header {
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 15px 6%;
+    color: var(--receipt-text);
+    background: rgba(8, 11, 22, 0.88);
+    border-bottom: 1px solid var(--receipt-border);
+    backdrop-filter: blur(18px);
+}
+
+body:not(.add-expense-page) .header-left,
+body:not(.add-expense-page) .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+body:not(.add-expense-page) .header-left img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+body:not(.add-expense-page) .header-left h2 {
+    margin: 0;
+    color: var(--receipt-text);
+    font-size: 16px;
+    font-weight: 750;
+}
+
+body:not(.add-expense-page) .back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    color: #c6cee2;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--receipt-border);
+    border-radius: 10px;
+    font-size: 12px;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+body:not(.add-expense-page) .back-btn:hover {
+    color: var(--receipt-text);
+    background: rgba(71, 240, 206, 0.06);
+    border-color: rgba(71, 240, 206, 0.3);
+}
+
+body:not(.add-expense-page) .container {
+    width: min(900px, 90%);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin: 0 auto;
+    padding: 42px 0 54px;
+}
+
+body:not(.add-expense-page) .form-box {
+    min-width: 0;
+    padding: clamp(22px, 3.5vw, 34px);
+    color: var(--receipt-text);
+    background: linear-gradient(150deg, rgba(19, 25, 43, 0.97), rgba(12, 16, 30, 0.98));
+    border: 1px solid rgba(174, 190, 230, 0.17);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+body:not(.add-expense-page) .form-box h2 {
+    margin: 0 0 12px;
+    color: var(--receipt-text);
+    font-size: clamp(20px, 2.5vw, 26px);
+    letter-spacing: -0.5px;
+}
+
+body:not(.add-expense-page) .form-box h3 {
+    margin: 22px 0 12px;
+    color: var(--receipt-teal);
+    font-size: 17px;
+}
+
+body:not(.add-expense-page) .form-box h4 {
+    margin: 18px 0 8px;
+    color: #dfe5f5;
+    font-size: 13px;
+}
+
+body:not(.add-expense-page) .form-box p {
+    color: var(--receipt-muted);
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+body:not(.add-expense-page) #receiptScanForm {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+body:not(.add-expense-page) #receiptScanForm label {
+    color: #dfe5f5;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+body:not(.add-expense-page) #receiptFile,
+body:not(.add-expense-page) #expenseForm input,
+body:not(.add-expense-page) #expenseForm select {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    margin: 0 0 13px;
+    padding: 12px 13px;
+    color: var(--receipt-text);
+    background: #0b1020;
+    border: 1px solid rgba(174, 190, 230, 0.17);
+    border-radius: 11px;
+    font: inherit;
+    font-size: 13px;
+}
+
+body:not(.add-expense-page) #receiptFile {
+    margin-bottom: 0;
+    padding: 10px;
+}
+
+body:not(.add-expense-page) #receiptFile::file-selector-button {
+    margin: 0 12px 0 0;
+    padding: 9px 12px;
+    color: #07131a;
+    background: linear-gradient(100deg, var(--receipt-teal), #9bf6e1);
+    border: 0;
+    border-radius: 8px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+body:not(.add-expense-page) #receiptFileHint {
+    margin: 0;
+    font-size: 11px;
+}
+
+body:not(.add-expense-page) #scanReceiptBtn,
+body:not(.add-expense-page) #expenseForm button,
+body:not(.add-expense-page) #refreshReceiptsBtn {
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 17px;
+    color: #07131a;
+    background: linear-gradient(100deg, var(--receipt-teal), #9bf6e1);
+    border: 0;
+    border-radius: 11px;
+    box-shadow: 0 10px 25px rgba(71, 240, 206, 0.1);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body:not(.add-expense-page) #scanReceiptBtn:hover,
+body:not(.add-expense-page) #expenseForm button:hover,
+body:not(.add-expense-page) #refreshReceiptsBtn:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+    box-shadow: 0 13px 30px rgba(71, 240, 206, 0.16);
+}
+
+body:not(.add-expense-page) #scanReceiptBtn:disabled,
+body:not(.add-expense-page) #refreshReceiptsBtn:disabled {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+}
+
+body:not(.add-expense-page) #receiptScanStatus,
+body:not(.add-expense-page) #receiptHistoryStatus,
+body:not(.add-expense-page) #receiptExpenseStatus {
+    min-height: 1.4em;
+    margin: 14px 0 0;
+    color: var(--receipt-muted);
+    overflow-wrap: anywhere;
+}
+
+body:not(.add-expense-page) #receiptResult {
+    margin-top: 22px;
+    padding: 20px;
+    background: rgba(71, 240, 206, 0.035);
+    border: 1px solid rgba(71, 240, 206, 0.18);
+    border-radius: 15px;
+}
+
+body:not(.add-expense-page) #receiptResult[hidden] {
+    display: none !important;
+}
+
+body:not(.add-expense-page) #receiptResult > p {
+    margin: 9px 0;
+    overflow-wrap: anywhere;
+}
+
+body:not(.add-expense-page) #receiptResult strong {
+    color: #e9edfa;
+}
+
+body:not(.add-expense-page) #receiptItems,
+body:not(.add-expense-page) #receiptWarnings,
+body:not(.add-expense-page) #receiptHistoryList {
+    display: grid;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding-left: 20px;
+    color: var(--receipt-muted);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+body:not(.add-expense-page) #receiptWarnings {
+    color: #f4d49b;
+}
+
+body:not(.add-expense-page) #receiptHistoryList li,
+body:not(.add-expense-page) #receiptItems li,
+body:not(.add-expense-page) #receiptWarnings li {
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(174, 190, 230, 0.1);
+    border-radius: 8px;
+}
+
+body:not(.add-expense-page) #receiptInsights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+body:not(.add-expense-page) #receiptInsights > * {
+    min-width: 0;
+    margin: 0;
+    padding: 14px;
+    color: var(--receipt-muted);
+    background: rgba(167, 139, 250, 0.055);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    border-radius: 12px;
+    overflow-wrap: anywhere;
+}
+
+body:not(.add-expense-page) .form-box hr {
+    height: 1px;
+    margin: 25px 0;
+    background: var(--receipt-border);
+    border: 0;
+}
+
+body:not(.add-expense-page) .footer {
+    display: grid;
+    justify-items: center;
+    gap: 9px;
+    padding: 25px 6%;
+    color: #78839e;
+    background: rgba(8, 11, 22, 0.55);
+    border-top: 1px solid var(--receipt-border);
+    text-align: center;
+}
+
+body:not(.add-expense-page) .footer h3,
+body:not(.add-expense-page) .footer p {
+    margin: 0;
+}
+
+body:not(.add-expense-page) .footer h3 {
+    color: var(--receipt-text);
+    font-size: 15px;
+}
+
+body:not(.add-expense-page) .footer a {
+    color: var(--receipt-muted);
+    font-size: 11px;
+    text-decoration: none;
+}
+
+body:not(.add-expense-page) .footer a:hover {
+    color: var(--receipt-teal);
+}
+
+body:not(.add-expense-page) .contact {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 18px;
+}
+
+body:not(.add-expense-page) .contact p,
+body:not(.add-expense-page) .copy {
+    font-size: 10px;
+}
+
+body:not(.add-expense-page) button:focus-visible,
+body:not(.add-expense-page) a:focus-visible,
+body:not(.add-expense-page) input:focus-visible,
+body:not(.add-expense-page) select:focus-visible {
+    outline: 2px solid var(--receipt-teal);
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    body:not(.add-expense-page) .header {
+        padding: 12px 5%;
+    }
+
+    body:not(.add-expense-page) .header-left {
+        gap: 8px;
+    }
+
+    body:not(.add-expense-page) .header-left img {
+        width: 33px;
+        height: 33px;
+    }
+
+    body:not(.add-expense-page) .header-left h2 {
+        font-size: 12px;
+    }
+
+    body:not(.add-expense-page) .back-btn {
+        padding: 9px 10px;
+        font-size: 10px;
+    }
+
+    body:not(.add-expense-page) .container {
+        width: 92%;
+        gap: 17px;
+        padding: 25px 0 35px;
+    }
+
+    body:not(.add-expense-page) .form-box {
+        padding: 22px 17px;
+        border-radius: 18px;
+    }
+
+    body:not(.add-expense-page) #receiptResult {
+        padding: 14px;
+    }
+
+    body:not(.add-expense-page) .contact {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body:not(.add-expense-page) *,
+    body:not(.add-expense-page) *::before,
+    body:not(.add-expense-page) *::after {
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

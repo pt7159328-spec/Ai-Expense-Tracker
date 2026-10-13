@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Receipt History | AI Expense Tracker</title>
+    <meta
+        name="description"
+        content="Review your scanned receipts and track receipt details with AI Expense Tracker."
+    >
+
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/receipt-history.css">
+</head>
+
+<body class="receipt-history-page">
+
+    <!-- HEADER -->
+    <header class="history-header">
+        <a href="/dashboard-page" class="brand">
+            <span class="brand-icon" aria-hidden="true">₹</span>
+
+            <span class="brand-text">
+                <strong>AI Expense Tracker</strong>
+                <small>Smart money management</small>
+            </span>
+        </a>
+
+        <nav class="header-actions" aria-label="Page navigation">
+            <a href="/dashboard-page" class="nav-link">
+                <span aria-hidden="true">←</span>
+                Dashboard
+            </a>
+
+            <a href="/receipt-scanner.html" class="primary-btn">
+                <span aria-hidden="true">＋</span>
+                Scan New Receipt
+            </a>
+        </nav>
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="history-main">
+
+        <!-- PAGE INTRODUCTION -->
+        <section class="page-intro">
+            <div class="intro-copy">
+                <span class="eyebrow">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    YOUR RECEIPT RECORDS
+                </span>
+
+                <h1>Receipt <span>History</span></h1>
+
+                <p>
+                    Review your previously scanned receipts, check extracted
+                    details and keep your expense records organized in one place.
+                </p>
+            </div>
+
+            <a href="/expenses.html" class="secondary-btn">
+                View All Expenses
+                <span aria-hidden="true">→</span>
+            </a>
+        </section>
+
+
+        <!-- SUMMARY CARDS -->
+        <section class="history-summary" aria-label="Receipt history overview">
+
+            <article class="summary-card">
+                <div class="summary-card-top">
+                    <span class="summary-icon purple-icon" aria-hidden="true">
+                        ▤
+                    </span>
+                    <span class="card-label">RECEIPT RECORDS</span>
+                </div>
+
+                <p class="summary-title">Total Receipts</p>
+                <h2 id="totalReceipts">—</h2>
+
+                <p class="summary-caption">
+                    Your scanned receipt records
+                </p>
+            </article>
+
+            <article class="summary-card">
+                <div class="summary-card-top">
+                    <span class="summary-icon teal-icon" aria-hidden="true">
+                        ✓
+                    </span>
+                    <span class="card-label">PROCESSING STATUS</span>
+                </div>
+
+                <p class="summary-title">Processed Receipts</p>
+                <h2 id="processedReceipts">—</h2>
+
+                <p class="summary-caption">
+                    Receipts successfully processed
+                </p>
+            </article>
+
+            <article class="summary-card">
+                <div class="summary-card-top">
+                    <span class="summary-icon blue-icon" aria-hidden="true">
+                        ₹
+                    </span>
+                    <span class="card-label">RECORDED VALUE</span>
+                </div>
+
+                <p class="summary-title">Total Receipt Amount</p>
+                <h2 id="totalReceiptAmount">—</h2>
+
+                <p class="summary-caption">
+                    Amount across available receipt records
+                </p>
+            </article>
+
+        </section>
+
+
+        <!-- RECEIPT HISTORY PANEL -->
+        <section class="history-panel" aria-labelledby="historyHeading">
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">YOUR RECORDS</span>
+                    <h2 id="historyHeading">Scanned Receipts</h2>
+                    <p>
+                        Browse your receipt records and review their current status.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    id="refreshReceiptsButton"
+                    class="secondary-btn"
+                >
+                    <span aria-hidden="true">↻</span>
+                    Refresh
+                </button>
+            </div>
+
+
+            <!-- SEARCH AND FILTERS -->
+            <div class="history-filters">
+
+                <div class="filter-group search-group">
+                    <label for="receiptSearch">Search receipts</label>
+
+                    <input
+                        type="search"
+                        id="receiptSearch"
+                        name="receiptSearch"
+                        placeholder="Search by merchant or receipt name"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="filter-group">
+                    <label for="receiptStatusFilter">Status</label>
+
+                    <select id="receiptStatusFilter" name="receiptStatusFilter">
+                        <option value="">All statuses</option>
+                        <option value="processed">Processed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="receiptDateFilter">Receipt date</label>
+
+                    <input
+                        type="date"
+                        id="receiptDateFilter"
+                        name="receiptDateFilter"
+                    >
+                </div>
+
+                <button
+                    type="button"
+                    id="clearReceiptFiltersButton"
+                    class="text-button"
+                >
+                    Clear filters
+                </button>
+
+            </div>
+
+
+            <!-- STATUS MESSAGE -->
+            <div
+                id="receiptHistoryStatus"
+                class="history-status"
+                role="status"
+                aria-live="polite"
+                hidden
+            ></div>
+
+
+            <!-- LOADING STATE -->
+            <div
+                id="receiptHistoryLoading"
+                class="history-loading"
+                role="status"
+                aria-live="polite"
+                hidden
+            >
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <p>Loading your receipt history...</p>
+            </div>
+
+
+            <!-- ERROR STATE -->
+            <div
+                id="receiptHistoryError"
+                class="history-error"
+                role="alert"
+                hidden
+            >
+                <div class="state-icon" aria-hidden="true">!</div>
+
+                <h3>Unable to load receipt history</h3>
+
+                <p id="receiptHistoryErrorMessage">
+                    Something went wrong while loading your receipts.
+                    Please try again.
+                </p>
+
+                <button
+                    type="button"
+                    id="retryReceiptHistoryButton"
+                    class="primary-btn"
+                >
+                    Try Again
+                </button>
+            </div>
+
+
+            <!-- EMPTY STATE -->
+            <div
+                id="receiptHistoryEmpty"
+                class="history-empty"
+                hidden
+            >
+                <div class="empty-icon" aria-hidden="true">▤</div>
+
+                <h3 id="receiptHistoryEmptyHeading">No Receipts Yet</h3>
+
+                <p id="receiptHistoryEmptyMessage">
+                    Your scanned receipts will appear here once receipt records
+                    are available.
+                </p>
+
+                <a href="/receipt-scanner.html" class="primary-btn">
+                    <span aria-hidden="true">＋</span>
+                    Scan Your First Receipt
+                </a>
+            </div>
+
+
+            <!-- RECEIPT TABLE -->
+            <div
+                id="receiptHistoryTableContainer"
+                class="table-scroll"
+                hidden
+            >
+                <table class="receipt-history-table">
+                    <caption class="visually-hidden">
+                        Scanned receipt history with merchant, date, amount and status
+                    </caption>
+
+                    <thead>
+                        <tr>
+                            <th scope="col">Merchant</th>
+                            <th scope="col">Receipt Date</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Added On</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="receiptHistoryTableBody">
+                        <!-- Receipt rows will be populated by JavaScript. -->
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- PAGINATION -->
+            <div
+                id="receiptHistoryPagination"
+                class="history-pagination"
+                hidden
+            >
+                <p id="receiptHistoryPaginationInfo">
+                    Showing 0 receipts
+                </p>
+
+                <div class="pagination-actions">
+                    <button
+                        type="button"
+                        id="previousReceiptPageButton"
+                        class="pagination-btn"
+                        disabled
+                    >
+                        ← Previous
+                    </button>
+
+                    <span
+                        id="receiptHistoryPageIndicator"
+                        aria-live="polite"
+                    >
+                        Page 1
+                    </span>
+
+                    <button
+                        type="button"
+                        id="nextReceiptPageButton"
+                        class="pagination-btn"
+                        disabled
+                    >
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- HELPFUL LINKS -->
+        <section class="history-help" aria-label="Related expense pages">
+
+            <div class="help-card">
+                <div class="help-icon" aria-hidden="true">✦</div>
+
+                <div class="help-copy">
+                    <h3>Need to scan another receipt?</h3>
+                    <p>
+                        Upload a receipt and use AI to extract its expense details.
+                    </p>
+                </div>
+
+                <a href="/receipt-scanner.html" class="help-link">
+                    Open Receipt Scanner →
+                </a>
+            </div>
+
+            <div class="help-card">
+                <div class="help-icon" aria-hidden="true">₹</div>
+
+                <div class="help-copy">
+                    <h3>Review your expenses</h3>
+                    <p>
+                        View and manage your recorded expense transactions.
+                    </p>
+                </div>
+
+                <a href="/expenses.html" class="help-link">
+                    View Expenses →
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="history-footer">
+        <p>
+            © <span id="currentYear">2026</span> AI Expense Tracker.
+            Manage your money with clarity.
+        </p>
+
+        <a href="/dashboard-page">Back to Dashboard ↑</a>
+    </footer>
+
+
+    <!-- Receipt history behavior will be implemented separately. -->
+    <script src="/static/js/receipt-history.js" defer></script>
+
+</body>
+</html>

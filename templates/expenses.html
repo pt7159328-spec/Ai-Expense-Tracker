@@ -23,13 +23,19 @@
             </span>
         </a>
 
-        <nav class="header-actions">
+        <nav class="header-actions" aria-label="Main navigation">
             <a href="/dashboard-page" class="nav-link">
-                <span>←</span> Dashboard
+                <span aria-hidden="true">←</span> Dashboard
             </a>
 
             <a href="/add-expense.html" class="add-expense-btn">
-                <span>＋</span> Add Expense
+                <span aria-hidden="true">＋</span> Add Expense
+            </a>
+
+            <a href="/add-expense.html"
+               class="add-expense-btn"
+               aria-label="Open receipt scanner">
+                <span aria-hidden="true">▧</span> Scan Receipt
             </a>
         </nav>
     </header>
@@ -53,9 +59,15 @@
                 </p>
             </div>
 
-            <a href="/add-expense.html" class="primary-btn">
-                <span>＋</span> Add New Expense
-            </a>
+            <div class="intro-actions">
+                <a href="/add-expense.html" class="primary-btn">
+                    <span aria-hidden="true">＋</span> Add New Expense
+                </a>
+
+                <a href="/add-expense.html" class="primary-btn">
+                    <span aria-hidden="true">▧</span> Scan Receipt with AI
+                </a>
+            </div>
         </section>
 
 
@@ -63,7 +75,8 @@
         <section class="info-grid">
 
             <article class="info-card">
-                <div class="info-icon purple-icon">▤</div>
+                <div class="info-icon purple-icon" aria-hidden="true">▤</div>
+
                 <div>
                     <p>Transaction History</p>
                     <h3>All in one place</h3>
@@ -72,7 +85,8 @@
             </article>
 
             <article class="info-card">
-                <div class="info-icon teal-icon">⌕</div>
+                <div class="info-icon teal-icon" aria-hidden="true">⌕</div>
+
                 <div>
                     <p>Smart Filters</p>
                     <h3>Find expenses faster</h3>
@@ -81,7 +95,8 @@
             </article>
 
             <article class="info-card">
-                <div class="info-icon blue-icon">↗</div>
+                <div class="info-icon blue-icon" aria-hidden="true">↗</div>
+
                 <div>
                     <p>Expense Reports</p>
                     <h3>Export to PDF</h3>
@@ -119,6 +134,7 @@
 
                 <div class="filter-group">
                     <label for="categoryFilter">Category</label>
+
                     <select id="categoryFilter">
                         <option value="">All Categories</option>
                     </select>
@@ -126,6 +142,7 @@
 
                 <div class="filter-group">
                     <label for="currencyFilter">Currency</label>
+
                     <select id="currencyFilter">
                         <option value="">All Currencies</option>
                         <option value="INR">INR (₹)</option>
@@ -140,17 +157,17 @@
 
             <div class="filter-footer">
                 <p>
-                    <span class="hint-icon">ⓘ</span>
+                    <span class="hint-icon" aria-hidden="true">ⓘ</span>
                     Apply filters to find specific transactions.
                 </p>
 
                 <div class="filter-buttons">
                     <button type="button" id="filterBtn" class="filter-btn">
-                        <span>⌕</span> Apply Filters
+                        <span aria-hidden="true">⌕</span> Apply Filters
                     </button>
 
                     <button type="button" id="pdfBtn" class="pdf-btn">
-                        <span>⇩</span> Download PDF
+                        <span aria-hidden="true">⇩</span> Download PDF
                     </button>
                 </div>
             </div>
@@ -174,10 +191,11 @@
                 </span>
             </div>
 
-            <!-- EMPTY STATE: ID REQUIRED BY EXISTING JS -->
-            <div id="noData" class="no-data" style="display:none;">
 
-                <div class="empty-icon">₹</div>
+            <!-- EMPTY STATE -->
+            <div id="noData" class="no-data" style="display: none;">
+
+                <div class="empty-icon" aria-hidden="true">₹</div>
 
                 <h3>No Expenses Found</h3>
 
@@ -187,20 +205,24 @@
                 </p>
 
                 <a href="/add-expense.html" class="primary-btn">
-                    ＋ Add Your First Expense
+                    <span aria-hidden="true">＋</span> Add Your First Expense
+                </a>
+
+                <a href="/add-expense.html" class="primary-btn">
+                    <span aria-hidden="true">▧</span> Scan a Receipt
                 </a>
             </div>
 
 
-            <!-- TABLE ID AND TBODY ID MUST NOT CHANGE -->
+            <!-- KEEP EXISTING TABLE AND TBODY IDS -->
             <div class="table-scroll">
                 <table id="expenseTableWrapper">
                     <thead>
                         <tr>
-                            <th>AMOUNT</th>
-                            <th>CATEGORY</th>
-                            <th>DATE</th>
-                            <th>ACTIONS</th>
+                            <th scope="col">AMOUNT</th>
+                            <th scope="col">CATEGORY</th>
+                            <th scope="col">DATE</th>
+                            <th scope="col">ACTIONS</th>
                         </tr>
                     </thead>
 
@@ -209,19 +231,40 @@
             </div>
 
             <div class="table-note">
-                <span>ⓘ</span>
+                <span aria-hidden="true">ⓘ</span>
                 Your expense records are loaded from your account.
             </div>
 
         </section>
 
 
+        <!-- RECEIPT SCANNER SHORTCUT -->
+        <section class="smart-tip">
+            <div class="tip-icon" aria-hidden="true">✦</div>
+
+            <div>
+                <h3>Smart AI Receipt Scanner</h3>
+
+                <p>
+                    Upload a receipt from the expense page to scan its details
+                    and reduce manual data entry. Review the extracted details
+                    before relying on them.
+                </p>
+            </div>
+
+            <a href="/add-expense.html" class="tip-link">
+                Scan Receipt →
+            </a>
+        </section>
+
+
         <!-- BOTTOM TIP -->
         <section class="smart-tip">
-            <div class="tip-icon">✦</div>
+            <div class="tip-icon" aria-hidden="true">✦</div>
 
             <div>
                 <h3>Smart Money Tip</h3>
+
                 <p>
                     Review your expenses regularly to understand your
                     spending habits and identify opportunities to save.

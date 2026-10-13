@@ -184,6 +184,33 @@
     margin-bottom: 30px;
 }
 
+/* Header actions for manual entry and receipt scanning */
+.expenses-page .intro-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.expenses-page .intro-actions .primary-btn {
+    min-height: 44px;
+}
+
+.expenses-page .intro-actions a:not(:first-child) {
+    color: #e4eaff;
+    background: linear-gradient(135deg, #28365a, #202b48);
+    border: 1px solid rgba(101, 165, 255, 0.34);
+    box-shadow: 0 8px 24px rgba(65, 110, 210, 0.10);
+}
+
+.expenses-page .intro-actions a:not(:first-child):hover {
+    color: #ffffff;
+    border-color: rgba(101, 165, 255, 0.7);
+    box-shadow: 0 10px 28px rgba(65, 110, 210, 0.2);
+}
+
 .expenses-page .eyebrow,
 .expenses-page .section-kicker {
     display: block;
@@ -715,6 +742,20 @@
 }
 
 
+/* Keep repeated smart-tip panels visually separated */
+.expenses-page .smart-tip + .smart-tip {
+    margin-top: 16px;
+}
+
+.expenses-page .smart-tip p {
+    overflow-wrap: anywhere;
+}
+
+.expenses-page .smart-tip .tip-link {
+    flex-shrink: 0;
+}
+
+
 /* FOOTER */
 
 .expenses-page .expenses-footer {
@@ -795,6 +836,10 @@
     .expenses-page .page-intro {
         align-items: flex-start;
     }
+
+    .expenses-page .intro-actions {
+        justify-content: flex-start;
+    }
 }
 
 
@@ -858,6 +903,18 @@
 
     .expenses-page .page-intro .primary-btn {
         align-self: flex-start;
+    }
+
+    .expenses-page .intro-actions {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 9px;
+    }
+
+    .expenses-page .intro-actions .primary-btn {
+        flex: 1 1 145px;
+        white-space: normal;
+        text-align: center;
     }
 
     .expenses-page .info-grid {

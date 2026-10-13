@@ -1,5 +1,9 @@
-function getCurrencySymbol(currency) {
+"use strict";
 
+// ================================
+// CURRENCY SYMBOLS
+// ================================
+function getCurrencySymbol(currency) {
     const symbols = {
         INR: "₹",
         USD: "$",
@@ -8,152 +12,278 @@ function getCurrencySymbol(currency) {
         AED: "د.إ"
     };
 
-    if (!currency) {
-        return "₹";
-    }
-
     return symbols[currency] || "₹";
 }
-async function loadExpenses() {
 
-    const token = localStorage.getItem("token");
+
+// ================================
+// AUTHENTICATION HELPERS
+// ================================
+function getAuthToken() {
+    return localStorage.getItem("token");
+}
+
+function redirectToLogin(message) {
+    if (message) {
+        alert(message);
+    }
+
+    localStorage.removeItem("token");
+    window.location.href = "/login-page";
+}
+
+async function handleUnauthorized(response) {
+    if (response.status !== 401) {
+        return false;
+    }
+
+    redirectToLogin("Session expired. Please login again.");
+    return true;
+}
+
+async function getJsonResponse(response) {
+    if (!response.ok) {
+        throw new Error(`Request failed (${response.status})`);
+    }
+
+    return response.json();
+}
+
+
+// ================================
+// EXPENSE TABLE RENDERING
+// ================================
+function renderExpenses(expenses) {
+    const table = document.getElementById("expenseTable");
+    const noData = document.getElementById("noData");
+    const wrapper = document.getElementById("expenseTableWrapper");
+
+    if (!table || !noData || !wrapper) {
+        console.error("Expense table elements were not found.");
+        return;
+    }
+
+    table.replaceChildren();
+
+    if (!Array.isArray(expenses) || expenses.length === 0) {
+        wrapper.style.display = "none";
+        noData.style.display = "block";
+        return;
+    }
+
+    noData.style.display = "none";
+    wrapper.style.display = "table";
+
+    const fragment = document.createDocumentFragment();
+
+    expenses.forEach((expense) => {
+        const row = document.createElement("tr");
+
+        const amountCell = document.createElement("td");
+        amountCell.textContent =
+            `${getCurrencySymbol(expense.currency)}${expense.amount ?? ""}`;
+
+        const categoryCell = document.createElement("td");
+        categoryCell.textContent = expense.category ?? "";
+
+        const dateCell = document.createElement("td");
+        dateCell.textContent = expense.date ?? "";
+
+        const actionCell = document.createElement("td");
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "action-btn edit";
+        editButton.textContent = "Edit";
+
+        editButton.addEventListener("click", () => {
+            editExpense(
+                expense._id,
+                expense.category ?? "",
+                expense.amount ?? "",
+                expense.date ?? ""
+            );
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "action-btn delete";
+        deleteButton.textContent = "Delete";
+
+        deleteButton.addEventListener("click", () => {
+            deleteExpense(expense._id);
+        });
+
+        actionCell.append(editButton, deleteButton);
+        row.append(amountCell, categoryCell, dateCell, actionCell);
+        fragment.appendChild(row);
+    });
+
+    table.appendChild(fragment);
+}
+
+
+// ================================
+// LOAD EXPENSES
+// ================================
+async function loadExpenses() {
+    const token = getAuthToken();
 
     if (!token) {
-        alert("Please login first");
-        window.location.href = "/login-page";
+        redirectToLogin("Please login first.");
         return;
     }
 
     try {
-
         const response = await fetch("/expenses", {
             headers: {
-                "Authorization": "Bearer " + token
+                "Authorization": `Bearer ${token}`
             }
         });
 
-        if (response.status === 401) {
-            alert("Session expired. Please login again.");
-            localStorage.clear();
-            window.location.href = "/login-page";
+        if (await handleUnauthorized(response)) {
             return;
         }
 
-        const data = await response.json();
+        const data = await getJsonResponse(response);
 
-        const table = document.getElementById("expenseTable");
-        const noData = document.getElementById("noData");
-        const wrapper = document.getElementById("expenseTableWrapper");
-
-        table.innerHTML = "";
-
-        if (data.length === 0) {
-            wrapper.style.display = "none";
-            noData.style.display = "block";
-            return;
+        if (!Array.isArray(data)) {
+            throw new Error("Unexpected expenses response.");
         }
 
-        noData.style.display = "none";
-        wrapper.style.display = "table";
-
-        data.forEach(exp => {
-            const row = `
-                <tr>
-                    <td>${getCurrencySymbol(exp.currency)}${exp.amount}</td>
-                    <td>${exp.category}</td>
-                    <td>${exp.date}</td>
-                    <td>
-                        <button class="action-btn edit" onclick="editExpense('${exp._id}', '${exp.category}', '${exp.amount}', '${exp.date}')">Edit</button>
-
-                        <button class="action-btn delete" onclick="deleteExpense('${exp._id}')">Delete</button>
-                    </td>
-                </tr>
-            `;
-
-            table.innerHTML += row;
-        });
-
+        renderExpenses(data);
     } catch (error) {
-        alert("Error loading data");
-        console.error(error);
+        console.error("Error loading expenses:", error);
+        alert("Unable to load expenses. Please try again.");
     }
 }
 
 
-// 🔴 DELETE FUNCTION
+// ================================
+// DELETE EXPENSE
+// ================================
 async function deleteExpense(id) {
+    if (!id) {
+        alert("Unable to identify this expense.");
+        return;
+    }
 
-    const token = localStorage.getItem("token");
+    if (!confirm("Delete this expense?")) {
+        return;
+    }
 
-    if (!confirm("Delete this expense?")) return;
+    const token = getAuthToken();
+
+    if (!token) {
+        redirectToLogin("Please login first.");
+        return;
+    }
 
     try {
-
-        const response = await fetch(`/delete-expense/${id}`, {
-            method: "DELETE",
-            headers: {
-                "Authorization": "Bearer " + token
+        const response = await fetch(
+            `/delete-expense/${encodeURIComponent(id)}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             }
-        });
+        );
 
-        if (response.status === 401) {
-            alert("Session expired");
-            localStorage.clear();
-            window.location.href = "/login-page";
+        if (await handleUnauthorized(response)) {
             return;
         }
 
-        if (response.ok) {
-            alert("Deleted!");
-            loadExpenses();
+        if (!response.ok) {
+            throw new Error(`Delete failed (${response.status})`);
         }
 
+        alert("Expense deleted successfully.");
+        await loadExpenses();
     } catch (error) {
-        alert("Delete failed");
+        console.error("Error deleting expense:", error);
+        alert("Delete failed. Please try again.");
     }
 }
 
 
-// 🟡 EDIT FUNCTION
+// ================================
+// EDIT EXPENSE
+// ================================
 async function editExpense(id, category, amount, date) {
+    if (!id) {
+        alert("Unable to identify this expense.");
+        return;
+    }
 
     const newAmount = prompt("New amount:", amount);
+    if (newAmount === null) return;
+
+    const trimmedAmount = newAmount.trim();
+
+    if (!trimmedAmount || !Number.isFinite(Number(trimmedAmount)) ||
+        Number(trimmedAmount) <= 0) {
+        alert("Please enter a valid amount greater than zero.");
+        return;
+    }
+
     const newCategory = prompt("New category:", category);
-    const newDate = prompt("New date:", date);
+    if (newCategory === null) return;
 
-    if (!newAmount || !newCategory || !newDate) return;
+    const trimmedCategory = newCategory.trim();
 
-    const token = localStorage.getItem("token");
+    if (!trimmedCategory) {
+        alert("Category cannot be empty.");
+        return;
+    }
+
+    const newDate = prompt("New date (YYYY-MM-DD):", date);
+    if (newDate === null) return;
+
+    const trimmedDate = newDate.trim();
+
+    if (!trimmedDate) {
+        alert("Date cannot be empty.");
+        return;
+    }
+
+    const token = getAuthToken();
+
+    if (!token) {
+        redirectToLogin("Please login first.");
+        return;
+    }
 
     try {
+        const response = await fetch(
+            `/update-expense/${encodeURIComponent(id)}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    amount: trimmedAmount,
+                    category: trimmedCategory,
+                    date: trimmedDate
+                })
+            }
+        );
 
-        const response = await fetch(`/update-expense/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token
-            },
-            body: JSON.stringify({
-                amount: newAmount,
-                category: newCategory,
-                date: newDate
-            })
-        });
-
-        if (response.status === 401) {
-            alert("Session expired");
-            localStorage.clear();
-            window.location.href = "/login-page";
+        if (await handleUnauthorized(response)) {
             return;
         }
 
-        if (response.ok) {
-            alert("Updated!");
-            loadExpenses();
+        if (!response.ok) {
+            throw new Error(`Update failed (${response.status})`);
         }
 
+        alert("Expense updated successfully.");
+        await loadExpenses();
     } catch (error) {
-        alert("Update failed");
+        console.error("Error updating expense:", error);
+        alert("Update failed. Please try again.");
     }
 }
 
@@ -162,31 +292,94 @@ async function editExpense(id, category, amount, date) {
 // LOAD USER CATEGORIES
 // ================================
 async function loadCategories() {
+    const token = getAuthToken();
 
-    const token = localStorage.getItem("token");
+    if (!token) {
+        return;
+    }
+
+    const categoryFilter = document.getElementById("categoryFilter");
+
+    if (!categoryFilter) {
+        return;
+    }
 
     try {
-
         const response = await fetch("/user-categories", {
             headers: {
-                "Authorization": "Bearer " + token
+                "Authorization": `Bearer ${token}`
             }
         });
 
-        const data = await response.json();
+        if (await handleUnauthorized(response)) {
+            return;
+        }
 
-        const categoryFilter = document.getElementById("categoryFilter");
+        const categories = await getJsonResponse(response);
 
-        data.forEach(cat => {
+        if (!Array.isArray(categories)) {
+            throw new Error("Unexpected categories response.");
+        }
 
-            categoryFilter.innerHTML += `
-                <option value="${cat}">${cat}</option>
-            `;
+        // Keep the existing default option and avoid duplicate categories.
+        const existingValues = new Set(
+            Array.from(categoryFilter.options, (option) => option.value)
+        );
+
+        categories.forEach((category) => {
+            if (typeof category !== "string" || !category.trim()) {
+                return;
+            }
+
+            if (existingValues.has(category)) {
+                return;
+            }
+
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent = category;
+
+            categoryFilter.appendChild(option);
+            existingValues.add(category);
         });
-
     } catch (error) {
-        console.log(error);
+        console.error("Error loading categories:", error);
     }
+}
+
+
+// ================================
+// BUILD FILTER QUERY
+// ================================
+function buildExpenseFilterQuery() {
+    const params = new URLSearchParams();
+
+    const fromDate =
+        document.getElementById("fromDate")?.value || "";
+
+    const toDate =
+        document.getElementById("toDate")?.value || "";
+
+    const category =
+        document.getElementById("categoryFilter")?.value || "";
+
+    const currency =
+        document.getElementById("currencyFilter")?.value || "";
+
+    if (fromDate && toDate) {
+        params.set("from_date", fromDate);
+        params.set("to_date", toDate);
+    }
+
+    if (category) {
+        params.set("category", category);
+    }
+
+    if (currency) {
+        params.set("currency", currency);
+    }
+
+    return params;
 }
 
 
@@ -194,143 +387,145 @@ async function loadCategories() {
 // FILTER EXPENSES
 // ================================
 async function filterExpenses() {
+    const token = getAuthToken();
 
-    const token = localStorage.getItem("token");
-
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
-    const category = document.getElementById("categoryFilter").value;
-    const currency = document.getElementById("currencyFilter").value;
-
-    let url = `/filter-expenses?`;
-
-    if (fromDate && toDate) {
-        url += `from_date=${fromDate}&to_date=${toDate}&`;
+    if (!token) {
+        redirectToLogin("Please login first.");
+        return;
     }
 
-    if (category) {
-    url += `category=${category}&`;
-}
-
-if (currency) {
-    url += `currency=${currency}&`;
-}
+    const params = buildExpenseFilterQuery();
+    const query = params.toString();
+    const url = query ? `/filter-expenses?${query}` : "/filter-expenses";
 
     try {
-
         const response = await fetch(url, {
             headers: {
-                "Authorization": "Bearer " + token
+                "Authorization": `Bearer ${token}`
             }
         });
 
-        const data = await response.json();
-
-        const table = document.getElementById("expenseTable");
-        const noData = document.getElementById("noData");
-        const wrapper = document.getElementById("expenseTableWrapper");
-
-        table.innerHTML = "";
-
-        if (data.length === 0) {
-            wrapper.style.display = "none";
-            noData.style.display = "block";
+        if (await handleUnauthorized(response)) {
             return;
         }
 
-        noData.style.display = "none";
-        wrapper.style.display = "table";
+        const data = await getJsonResponse(response);
 
-        data.forEach(exp => {
+        if (!Array.isArray(data)) {
+            throw new Error("Unexpected filtered expenses response.");
+        }
 
-            console.log(exp);
-
-            const row = `
-                <tr>
-                    <td>${getCurrencySymbol(exp.currency)}${exp.amount}</td>
-                    <td>${exp.category}</td>
-                    <td>${exp.date}</td>
-                    <td>
-                        <button class="action-btn edit" onclick="editExpense('${exp._id}', '${exp.category}', '${exp.amount}', '${exp.date}')">Edit</button>
-
-                        <button class="action-btn delete" onclick="deleteExpense('${exp._id}')">Delete</button>
-                    </td>
-                </tr>
-            `;
-
-            table.innerHTML += row;
-        });
-
+        renderExpenses(data);
     } catch (error) {
-        console.log(error);
+        console.error("Error filtering expenses:", error);
+        alert("Unable to filter expenses. Please try again.");
     }
 }
 
 
 // ================================
-// DOWNLOAD PDF
+// DOWNLOAD PDF REPORT
 // ================================
-function downloadPDF() {
+async function downloadPDF() {
+    const token = getAuthToken();
 
-    const token = localStorage.getItem("token");
+    if (!token) {
+        redirectToLogin("Please login first.");
+        return;
+    }
 
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
-    const category = document.getElementById("categoryFilter").value;
+    const params = new URLSearchParams();
 
-    let url = `/report-pdf?`;
+    const fromDate =
+        document.getElementById("fromDate")?.value || "";
+
+    const toDate =
+        document.getElementById("toDate")?.value || "";
+
+    const category =
+        document.getElementById("categoryFilter")?.value || "";
 
     if (fromDate && toDate) {
-        url += `from_date=${fromDate}&to_date=${toDate}&`;
+        params.set("from_date", fromDate);
+        params.set("to_date", toDate);
     }
 
     if (category) {
-        url += `category=${category}`;
+        params.set("category", category);
     }
 
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    })
-    .then(response => response.blob())
-    .then(blob => {
+    const query = params.toString();
+    const url = query ? `/report-pdf?${query}` : "/report-pdf";
 
-        const blobUrl = window.URL.createObjectURL(blob);
+    let blobUrl = null;
+
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (await handleUnauthorized(response)) {
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`PDF request failed (${response.status})`);
+        }
+
+        const blob = await response.blob();
+
+        if (!blob.size) {
+            throw new Error("The PDF response was empty.");
+        }
+
+        blobUrl = window.URL.createObjectURL(blob);
 
         const link = document.createElement("a");
-
         link.href = blobUrl;
         link.download = "expense_report.pdf";
 
         document.body.appendChild(link);
-
         link.click();
-
-        document.body.removeChild(link);
-
-        window.URL.revokeObjectURL(blobUrl);
-
-    })
-    .catch(error => {
-        console.log(error);
-        alert("PDF download failed");
-    });
+        link.remove();
+    } catch (error) {
+        console.error("Error downloading PDF:", error);
+        alert("PDF download failed. Please try again.");
+    } finally {
+        if (blobUrl) {
+            window.URL.revokeObjectURL(blobUrl);
+        }
+    }
 }
 
 
 // ================================
-// BUTTON EVENTS
+// INITIALIZE PAGE EVENTS
 // ================================
-document.getElementById("filterBtn")
-.addEventListener("click", filterExpenses);
-document.getElementById("pdfBtn")
-.addEventListener("click", downloadPDF);
+function initializeExpensesPage() {
+    const filterButton = document.getElementById("filterBtn");
+    const pdfButton = document.getElementById("pdfBtn");
 
+    if (filterButton) {
+        filterButton.addEventListener("click", filterExpenses);
+    }
 
-// ================================
-// CALL
-// ================================
-loadExpenses();
-loadCategories();
+    if (pdfButton) {
+        pdfButton.addEventListener("click", downloadPDF);
+    }
+
+    loadExpenses();
+    loadCategories();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeExpensesPage,
+        { once: true }
+    );
+} else {
+    initializeExpensesPage();
+}

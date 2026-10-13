@@ -440,6 +440,54 @@ textarea:disabled {
     color: var(--color-danger);
 }
 
+/* ===================== RECEIPT SCANNER SHARED UI ===================== */
+
+/* Use this wrapper to group scanner actions and links. */
+.scanner-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-block: 16px;
+}
+
+.scanner-actions > * {
+    max-width: 100%;
+}
+
+/* Shared status message for upload or scanning feedback. */
+.scanner-status {
+    padding: 12px 16px;
+    margin-block: 12px;
+
+    color: var(--color-text);
+    background: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    overflow-wrap: anywhere;
+}
+
+/* Optional status modifiers for scanner feedback. */
+.scanner-status--success {
+    color: #065f46;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.scanner-status--error {
+    color: #991b1b;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.scanner-status--loading {
+    color: #3730a3;
+    background: var(--color-primary-light);
+    border-color: #c7d2fe;
+}
+
 /* ===================== FOOTER ===================== */
 
 footer {
@@ -537,6 +585,21 @@ footer a:hover {
 
     .container {
         width: calc(100% - 24px);
+    }
+
+    .scanner-actions {
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .scanner-actions .btn,
+    .scanner-actions .btn-primary,
+    .scanner-actions .btn-secondary {
+        max-width: 100%;
+    }
+
+    .scanner-status {
+        padding: 10px 12px;
     }
 
     footer {
