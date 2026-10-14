@@ -79,7 +79,8 @@
                         <div>
                             <h2>Upload a receipt</h2>
                             <p>
-                                Select a clear image of your bill or receipt.
+                                Select a clear image or PDF of your bill,
+                                receipt, or supported transaction record.
                             </p>
                         </div>
                     </div>
@@ -93,8 +94,8 @@
                         <div>
                             <h2>Prepare expense details</h2>
                             <p>
-                                Get ready to review the information extracted
-                                from your receipt.
+                                Review the information extracted from
+                                your receipt or transaction record.
                             </p>
                         </div>
                     </div>
@@ -125,8 +126,9 @@
                     <span class="receipt-tip-label">SCANNING TIP</span>
 
                     <p>
-                        Keep the receipt flat, well-lit and fully visible
-                        for better text recognition.
+                        Keep images clear, well-lit and fully visible.
+                        For transaction screenshots, ensure the relevant
+                        payment details are readable.
                     </p>
                 </div>
             </aside>
@@ -153,7 +155,7 @@
                         <h2 id="uploadHeading">Upload your receipt</h2>
 
                         <p>
-                            Choose an image of your receipt to begin.
+                            Choose an image or PDF file to begin.
                         </p>
                     </div>
 
@@ -181,30 +183,32 @@
                             ↑
                         </div>
 
-                        <h3>Choose a receipt image</h3>
+                        <h3>Choose a receipt file</h3>
 
                         <p>
-                            Select an image from your device to continue.
+                            Select a receipt image, bill, or supported PDF
+                            from your device to continue.
                         </p>
 
                         <label
                             for="receiptFile"
                             class="receipt-select-button"
                         >
-                            Choose Image
+                            Choose File
                         </label>
 
                         <input
                             type="file"
                             id="receiptFile"
                             name="receipt"
-                            accept="image/jpeg,image/png,image/webp"
+                            accept=".jpg,.jpeg,.png,.webp,.bmp,.tif,.tiff,.pdf,image/jpeg,image/png,image/webp,image/bmp,image/tiff,application/pdf"
                             aria-describedby="receiptFileHelp receiptFileError"
                             required
                         >
 
                         <p class="receipt-file-help" id="receiptFileHelp">
-                            Supported formats: JPG, PNG and WEBP.
+                            Supported formats: JPG, JPEG, PNG, WEBP,
+                            BMP, TIFF and PDF. Maximum file size: 10 MB.
                         </p>
 
                     </div>
@@ -271,7 +275,7 @@
 
                                 <p class="receipt-file-ready">
                                     <span aria-hidden="true">●</span>
-                                    Image selected
+                                    File selected
                                 </p>
                             </div>
 
@@ -314,8 +318,8 @@
 
                     <p class="receipt-privacy-note">
                         Review the extracted information before saving
-                        an expense. Only upload receipts you are authorized
-                        to share.
+                        an expense. Only upload receipts and transaction
+                        records you are authorized to share.
                     </p>
 
                 </form>
@@ -463,9 +467,9 @@
                     </div>
 
                     <p class="receipt-results-note">
-                        Please verify all extracted values. The details
-                        shown here must be processed by the scanner
-                        integration before they can be saved.
+                        Please verify all extracted values. Make sure
+                        the scanner has processed the file and populated
+                        the details before saving the expense.
                     </p>
 
                 </form>
@@ -504,7 +508,7 @@
                     <h3>Upload</h3>
 
                     <p>
-                        Select a clear image of your receipt.
+                        Select a supported receipt image or PDF file.
                     </p>
                 </article>
 
@@ -514,7 +518,7 @@
                     <h3>Scan and review</h3>
 
                     <p>
-                        Process the image and verify the extracted details.
+                        Process the file and verify the extracted details.
                     </p>
                 </article>
 
@@ -524,8 +528,7 @@
                     <h3>Save</h3>
 
                     <p>
-                        Save the verified expense when the integration
-                        is ready.
+                        Save the verified expense after checking the details.
                     </p>
                 </article>
 
@@ -551,8 +554,9 @@
     </footer>
 
 
-    <!-- Receipt Scanner behavior will be added in its JavaScript file. -->
-    <script src="/static/js/receipt-scanner.js" defer></script>
+    <!-- Load the existing scanner JavaScript file.
+         Keep this filename aligned with the actual file in static/js/. -->
+    <script src="/static/js/reciept-scanner.js" defer></script>
 
 </body>
 </html>
