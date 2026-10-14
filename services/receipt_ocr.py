@@ -1,11 +1,14 @@
 """
-Receipt OCR service for AI Expense Tracker.
+Receipt OCR and UPI Transaction Parsing service for AI Expense Tracker.
 
 Responsibilities:
 - Extract text from receipt images and PDF files.
 - Preprocess images to improve OCR results.
-- Parse receipt date, total amount, currency, merchant, and line items.
-- Generate basic receipt validation insights.
+- Parse receipt date, total amount, currency, merchant and line items.
+- Recognize PhonePe, Google Pay, Paytm and other UPI screenshots.
+- Extract transaction amount, date, time, reference and payment status.
+- Classify money sent, money received and possible self-transfers.
+- Generate basic validation insights and warnings.
 
 Optional dependencies:
 - Pillow
@@ -14,6 +17,7 @@ Optional dependencies:
 - PyMuPDF (fitz) or pypdf for PDF processing
 
 This module does not access the database or define Flask routes.
+Automatic expense saving must be integrated in the application backend.
 """
 
 import io
@@ -24,16 +28,16 @@ from decimal import Decimal, InvalidOperation
 
 
 ALLOWED_RECEIPT_EXTENSIONS = {
-    "png",
-    "jpg",
-    "jpeg",
-    "webp",
-    "bmp",
-    "tif",
-    "tiff",
-    "pdf",
+    "png", "jpg", "jpeg", "webp", "bmp",
+    "tif", "tiff", "pdf",
 }
 
+UPI_PLATFORMS = {
+    "phonepe": ("phonepe",),
+    "google_pay": ("google pay", "googlepay", "gpay"),
+    "paytm": ("paytm",),
+    "other_upi": ("upi", "bhim"),
+}
 
 # ---------------------------------------------------------------------
 # OCR AND TEXT EXTRACTION
@@ -45,22 +49,7 @@ def extract_receipt_text(
     ocr_language=None,
     tesseract_cmd=None,
 ):
-    """
-    Extract text from an uploaded receipt image or PDF.
-
-    Args:
-        filename: Original uploaded filename.
-        content: File contents as bytes.
-        ocr_language: Optional Tesseract language, e.g. "eng".
-        tesseract_cmd: Optional path to the Tesseract executable.
-
-    Returns:
-        Extracted receipt text as a string.
-
-    Raises:
-        ValueError: If the file cannot be processed.
-        RuntimeError: If a required optional dependency is missing.
-    """
+    """Extract text from an uploaded receipt image or PDF."""
     if not filename:
         raise ValueError("A receipt filename is required.")
 
@@ -96,7 +85,7 @@ def extract_receipt_text(
 
 
 def _configure_tesseract(pytesseract, tesseract_cmd=None):
-    """Configure the Tesseract executable when a path is provided."""
+    """Configure Tesseract when an executable path is supplied."""
     executable = tesseract_cmd or os.environ.get("TESSERACT_CMD")
 
     if executable:
@@ -108,14 +97,14 @@ def _extract_image_text(
     ocr_language=None,
     tesseract_cmd=None,
 ):
-    """Extract text from an image using Tesseract OCR."""
+    """Extract image text with Tesseract OCR."""
     try:
         import pytesseract
         from PIL import Image, ImageOps, ImageFilter
     except ImportError as exc:
         raise RuntimeError(
-            "Image OCR is not configured. Install Pillow and "
-            "pytesseract, and install the Tesseract OCR engine."
+            "Image OCR is not configured. Install Pillow, pytesseract "
+            "and the Tesseract OCR engine."
         ) from exc
 
     _configure_tesseract(pytesseract, tesseract_cmd)
@@ -125,7 +114,6 @@ def _extract_image_text(
             image = ImageOps.exif_transpose(source_image)
             image = image.convert("RGB")
 
-        # Basic preprocessing for common receipt photographs.
         image = ImageOps.grayscale(image)
         image = ImageOps.autocontrast(image)
         image = image.filter(ImageFilter.SHARPEN)
@@ -152,11 +140,11 @@ def _extract_pdf_text(
     ocr_language=None,
     tesseract_cmd=None,
 ):
-    """Extract embedded text from PDFs and OCR scanned pages when possible."""
+    """Extract embedded PDF text, using OCR for scanned pages if possible."""
     text_parts = []
 
     try:
-        import fitz  # PyMuPDF
+        import fitz
     except ImportError:
         fitz = None
 
@@ -164,10 +152,7 @@ def _extract_pdf_text(
         document = None
 
         try:
-            document = fitz.open(
-                stream=content,
-                filetype="pdf",
-            )
+            document = fitz.open(stream=content, filetype="pdf")
 
             for page in document:
                 page_text = page.get_text("text") or ""
@@ -176,16 +161,13 @@ def _extract_pdf_text(
                     text_parts.append(page_text)
                     continue
 
-                # Attempt OCR on scanned pages when optional libraries
-                # are installed. Limit OCR attempts to avoid excessive work.
                 if len(text_parts) < 3:
                     try:
                         import pytesseract
                         from PIL import Image
 
                         _configure_tesseract(
-                            pytesseract,
-                            tesseract_cmd,
+                            pytesseract, tesseract_cmd
                         )
 
                         pixmap = page.get_pixmap(
@@ -203,19 +185,15 @@ def _extract_pdf_text(
 
                             page_ocr_text = (
                                 pytesseract.image_to_string(
-                                    page_image,
-                                    **options,
-                                )
-                                or ""
+                                    page_image, **options
+                                ) or ""
                             )
 
                         text_parts.append(page_ocr_text)
 
                     except ImportError:
-                        # Embedded PDF text can still be returned without OCR.
                         pass
                     except Exception:
-                        # Preserve any text already extracted from the PDF.
                         pass
 
             return "\n".join(text_parts).strip()
@@ -230,7 +208,6 @@ def _extract_pdf_text(
             if document is not None:
                 document.close()
 
-    # Fallback for text-based PDFs when PyMuPDF is unavailable.
     try:
         from pypdf import PdfReader
     except ImportError as exc:
@@ -261,150 +238,120 @@ def _extract_pdf_text(
 
 
 # ---------------------------------------------------------------------
+# SHARED DATE AND AMOUNT HELPERS
+# ---------------------------------------------------------------------
+
+def _parse_date_value(value):
+    """Convert a recognized date string to YYYY-MM-DD."""
+    value = re.sub(r"\s+", " ", (value or "").strip())
+
+    patterns = (
+        ("%Y-%m-%d", r"\b20\d{2}-\d{1,2}-\d{1,2}\b"),
+        ("%Y/%m/%d", r"\b20\d{2}/\d{1,2}/\d{1,2}\b"),
+        ("%d-%m-%Y", r"\b\d{1,2}-\d{1,2}-20\d{2}\b"),
+        ("%d/%m/%Y", r"\b\d{1,2}/\d{1,2}/20\d{2}\b"),
+        ("%d.%m.%Y", r"\b\d{1,2}\.\d{1,2}\.20\d{2}\b"),
+        ("%d %B %Y", r"\b\d{1,2}\s+[A-Za-z]+\s+20\d{2}\b"),
+        ("%d %b %Y", r"\b\d{1,2}\s+[A-Za-z]{3}\s+20\d{2}\b"),
+    )
+
+    for date_format, pattern in patterns:
+        match = re.search(pattern, value, re.IGNORECASE)
+
+        if not match:
+            continue
+
+        try:
+            return datetime.strptime(
+                match.group(0), date_format
+            ).date().isoformat()
+        except ValueError:
+            continue
+
+    return None
+
+
+def _parse_amount_value(value):
+    """Parse an amount string without treating arbitrary digits as money."""
+    if value is None:
+        return None
+
+    cleaned = str(value).strip()
+    cleaned = re.sub(r"(?i)\b(?:INR|RS\.?|RUPEES?)\b", "", cleaned)
+    cleaned = cleaned.replace("₹", "").replace(",", "").strip()
+    cleaned = re.sub(r"\s+", "", cleaned)
+
+    if not re.fullmatch(r"\d{1,12}(?:\.\d{1,2})?", cleaned):
+        return None
+
+    try:
+        amount = Decimal(cleaned)
+
+        if Decimal("0") < amount < Decimal("100000000"):
+            return float(amount.quantize(Decimal("0.01")))
+
+    except InvalidOperation:
+        pass
+
+    return None
+
+
+# ---------------------------------------------------------------------
 # RECEIPT FIELD PARSING
 # ---------------------------------------------------------------------
 
 def parse_receipt_date(text):
-    """
-    Find a recognizable receipt date and return YYYY-MM-DD.
-
-    Supports:
-    - YYYY-MM-DD
-    - YYYY/MM/DD
-    - YYYY.MM.DD
-    - DD-MM-YYYY and corresponding slash/dot formats
-    - DD Month YYYY, e.g. 14 October 2026
-    """
+    """Find a recognizable receipt date and return YYYY-MM-DD."""
     if not text:
         return None
 
-    patterns = [
-        r"\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b",
-        r"\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b",
-    ]
+    for line in text.splitlines():
+        result = _parse_date_value(line)
 
-    for pattern_index, pattern in enumerate(patterns):
-        for match in re.finditer(pattern, text):
-            try:
-                if pattern_index == 0:
-                    year, month, day = map(int, match.groups())
-                else:
-                    day, month, year = map(int, match.groups())
-
-                return datetime(
-                    year,
-                    month,
-                    day,
-                ).date().isoformat()
-
-            except ValueError:
-                continue
-
-    month_names = (
-        "January February March April May June "
-        "July August September October November December"
-    )
-
-    month_pattern = (
-        r"\b(\d{1,2})\s+("
-        + "|".join(month_names.split())
-        + r")\s+(20\d{2})\b"
-    )
-
-    match = re.search(
-        month_pattern,
-        text,
-        flags=re.IGNORECASE,
-    )
-
-    if match:
-        try:
-            month = datetime.strptime(
-                match.group(2).title(),
-                "%B",
-            ).month
-
-            return datetime(
-                int(match.group(3)),
-                month,
-                int(match.group(1)),
-            ).date().isoformat()
-
-        except ValueError:
-            pass
+        if result:
+            return result
 
     return None
 
 
 def parse_receipt_amount(text):
-    """
-    Extract a likely grand total.
-
-    Total-labelled lines are preferred. If no such line is found,
-    the parser falls back to amounts found anywhere in the text.
-
-    Note:
-        This is a heuristic. The result should be reviewed when OCR
-        output is incomplete or ambiguous.
-    """
+    """Extract a likely receipt total; this is a heuristic."""
     if not text:
         return None
 
     amount_pattern = (
-        r"(?:₹|Rs\.?|INR\s*)?\s*"
-        r"([0-9]{1,7}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?"
-        r"|[0-9]+\.[0-9]{1,2})"
+        r"(?:₹|Rs\.?\s*|INR\s*)?"
+        r"(\d{1,7}(?:,\d{3})*(?:\.\d{1,2})?|\d+\.\d{1,2})"
     )
-
-    lines = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip()
-    ]
 
     preferred = []
 
-    for line in lines:
+    for line in text.splitlines():
         if re.search(
             r"\b(grand\s+total|total\s+amount|amount\s+due|"
             r"net\s+amount|balance\s+due|total)\b",
             line,
-            flags=re.IGNORECASE,
+            re.IGNORECASE,
         ):
             preferred.extend(
-                re.findall(
-                    amount_pattern,
-                    line,
-                    flags=re.IGNORECASE,
-                )
+                re.findall(amount_pattern, line, re.IGNORECASE)
             )
 
     candidates = preferred or re.findall(
-        amount_pattern,
-        text,
-        flags=re.IGNORECASE,
+        amount_pattern, text, re.IGNORECASE
     )
 
-    parsed = []
+    parsed = [
+        amount
+        for candidate in candidates
+        if (amount := _parse_amount_value(candidate)) is not None
+    ]
 
-    for candidate in candidates:
-        try:
-            value = Decimal(candidate.replace(",", ""))
-
-            if Decimal("0") < value < Decimal("100000000"):
-                parsed.append(value)
-
-        except InvalidOperation:
-            continue
-
-    if not parsed:
-        return None
-
-    return float(max(parsed))
+    return max(parsed) if parsed else None
 
 
 def parse_receipt_currency(text):
-    """Identify a currency from common symbols and currency codes."""
+    """Identify common receipt currencies."""
     if not text:
         return None
 
@@ -426,11 +373,7 @@ def parse_receipt_currency(text):
 
 
 def parse_receipt_merchant(text, filename=None):
-    """
-    Guess the merchant from the first few lines of receipt text.
-
-    Falls back to the filename if no likely merchant is identified.
-    """
+    """Guess the merchant from receipt text, falling back to filename."""
     ignored = re.compile(
         r"(receipt|invoice|tax invoice|bill no|invoice no|date|time|"
         r"cashier|gstin|\bphone\b|\bwww\.|http|\btotal\b|\bamount\b)",
@@ -448,22 +391,12 @@ def parse_receipt_merchant(text, filename=None):
             ):
                 return clean[:120]
 
-    base = os.path.splitext(
-        os.path.basename(filename or "")
-    )[0]
-
+    base = os.path.splitext(os.path.basename(filename or ""))[0]
     return base[:120] if base else "Unknown merchant"
 
 
 def parse_receipt_items(text):
-    """
-    Heuristically identify receipt line items.
-
-    Returns:
-        A list of dictionaries containing name, line_total and quantity.
-
-    OCR and receipt layouts vary, so these results are estimates.
-    """
+    """Heuristically identify receipt line items."""
     items = []
 
     if not text:
@@ -478,7 +411,7 @@ def parse_receipt_items(text):
 
     price_pattern = re.compile(
         r"(?:₹|Rs\.?\s*)?"
-        r"([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)\s*$",
+        r"(\d{1,7}(?:,\d{3})*(?:\.\d{1,2})?)\s*$",
         re.IGNORECASE,
     )
 
@@ -498,19 +431,14 @@ def parse_receipt_items(text):
         if len(name) < 2 or re.fullmatch(r"[\d\W]+", name):
             continue
 
-        try:
-            price = float(match.group(1).replace(",", ""))
-        except ValueError:
-            continue
+        price = _parse_amount_value(match.group(1))
 
-        if 0 < price < 10000000:
-            items.append(
-                {
-                    "name": name[:120],
-                    "line_total": round(price, 2),
-                    "quantity": None,
-                }
-            )
+        if price is not None:
+            items.append({
+                "name": name[:120],
+                "line_total": price,
+                "quantity": None,
+            })
 
         if len(items) >= 100:
             break
@@ -519,79 +447,491 @@ def parse_receipt_items(text):
 
 
 # ---------------------------------------------------------------------
+# UPI PLATFORM, STATUS AND TRANSACTION PARSING
+# ---------------------------------------------------------------------
+
+def detect_upi_platform(text):
+    """Identify a payment app from OCR text when its name is present."""
+    normalized = re.sub(r"\s+", " ", (text or "").lower())
+
+    for platform, names in UPI_PLATFORMS.items():
+        if any(name in normalized for name in names):
+            return platform
+
+    return None
+
+
+def _find_transaction_status(text):
+    """Return a payment status only when a recognizable status is present."""
+    normalized = re.sub(r"\s+", " ", (text or "").lower())
+
+    failure_patterns = (
+        r"\b(payment failed|transaction failed|failed transaction|"
+        r"payment declined|transaction declined|payment unsuccessful)\b",
+    )
+
+    pending_patterns = (
+        r"\b(payment pending|transaction pending|processing payment|"
+        r"awaiting confirmation|in progress)\b",
+    )
+
+    success_patterns = (
+        r"\b(payment successful|transaction successful|"
+        r"successfully paid|payment completed|transaction completed|"
+        r"paid successfully|money sent successfully|"
+        r"money received successfully)\b",
+    )
+
+    if any(re.search(p, normalized) for p in failure_patterns):
+        return "failed"
+
+    if any(re.search(p, normalized) for p in pending_patterns):
+        return "pending"
+
+    if any(re.search(p, normalized) for p in success_patterns):
+        return "success"
+
+    # Some apps display only a standalone "Successful" or "Completed".
+    if re.search(r"\b(successful|completed)\b", normalized):
+        return "success"
+
+    return "unknown"
+
+
+def _find_transaction_amount(text):
+    """
+    Extract an amount from transaction-labelled lines first.
+
+    Avoid selecting UPI IDs, reference numbers, dates or phone numbers
+    as the transaction amount whenever possible.
+    """
+    if not text:
+        return None
+
+    amount_pattern = re.compile(
+        r"(?:₹\s*|INR\s*|Rs\.?\s*)"
+        r"(\d{1,7}(?:,\d{3})*(?:\.\d{1,2})?|\d+\.\d{1,2})",
+        re.IGNORECASE,
+    )
+
+    labelled_pattern = re.compile(
+        r"\b(amount|paid|sent|debited|received|credited|"
+        r"you\s+paid|you\s+sent|you\s+received|"
+        r"total\s+paid|payment\s+of)\b",
+        re.IGNORECASE,
+    )
+
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    candidates = []
+
+    # First pass: explicit currency symbol/code on a transaction line.
+    for line in lines:
+        if not labelled_pattern.search(line):
+            continue
+
+        matches = list(amount_pattern.finditer(line))
+
+        for match in matches:
+            amount = _parse_amount_value(match.group(1))
+
+            if amount is not None:
+                candidates.append((line, amount))
+
+    if candidates:
+        # Prefer an amount on a "Paid", "Sent", "Received" or
+        # "Debited" line, rather than a reference or account number.
+        priority = re.compile(
+            r"\b(paid|sent|debited|received|credited|you\s+paid|"
+            r"you\s+sent|you\s+received|total\s+paid|payment\s+of)\b",
+            re.IGNORECASE,
+        )
+
+        prioritized = [
+            amount for line, amount in candidates
+            if priority.search(line)
+        ]
+
+        if prioritized:
+            return prioritized[0]
+
+        return candidates[0][1]
+
+    # Second pass: currency symbols without a transaction label.
+    for line in lines:
+        matches = list(amount_pattern.finditer(line))
+
+        if matches:
+            amount = _parse_amount_value(matches[0].group(1))
+
+            if amount is not None:
+                return amount
+
+    # Do not guess from arbitrary bare numbers in a UPI screenshot.
+    return None
+
+
+def _find_transaction_datetime(text):
+    """Extract transaction date and time where possible."""
+    if not text:
+        return None, None
+
+    date_value = None
+    time_value = None
+
+    for line in text.splitlines():
+        if date_value is None:
+            date_value = _parse_date_value(line)
+
+        if time_value is None:
+            match = re.search(
+                r"\b(0?[1-9]|1[0-2]|0?\d|2[0-3]):([0-5]\d)"
+                r"(?:\s*:\s*([0-5]\d))?\s*(AM|PM)?\b",
+                line,
+                re.IGNORECASE,
+            )
+
+            if match:
+                raw = re.sub(r"\s+", "", match.group(0)).upper()
+                raw = raw.replace("AM", " AM").replace("PM", " PM")
+
+                try:
+                    formats = ("%I:%M %p", "%I:%M:%S %p",
+                               "%H:%M", "%H:%M:%S")
+
+                    for fmt in formats:
+                        try:
+                            time_value = datetime.strptime(
+                                raw.strip(), fmt
+                            ).strftime("%H:%M:%S")
+                            break
+                        except ValueError:
+                            continue
+                except (TypeError, ValueError):
+                    time_value = None
+
+    return date_value, time_value
+
+
+def _find_transaction_reference(text):
+    """Extract a labelled UPI reference or transaction ID."""
+    if not text:
+        return None
+
+    patterns = (
+        r"\b(?:UPI\s+)?(?:transaction\s+ID|txn\s+ID|"
+        r"reference\s+(?:number|no\.?|ID)|UTR|RRN)\s*[:#\-]?\s*"
+        r"([A-Z0-9][A-Z0-9\-]{5,34})\b",
+        r"\bUPI\s+Ref(?:erence)?\s*(?:No\.?|ID)?\s*[:#\-]?\s*"
+        r"([A-Z0-9][A-Z0-9\-]{5,34})\b",
+    )
+
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+
+        if match:
+            reference = match.group(1).strip()
+
+            if not re.fullmatch(r"\d{10,}", reference):
+                return reference
+
+    return None
+
+
+def _find_party(text, direction):
+    """
+    Extract a likely counterparty from common UPI labels.
+
+    OCR layouts differ across apps, so this is a best-effort guess.
+    """
+    if not text:
+        return None
+
+    if direction == "money_sent":
+        labels = (
+            r"(?:paid\s+to|sent\s+to|transferred\s+to|"
+            r"money\s+sent\s+to|to)\s*[:\-]?\s*(.+)",
+        )
+    elif direction == "money_received":
+        labels = (
+            r"(?:received\s+from|money\s+received\s+from|"
+            r"paid\s+by|from)\s*[:\-]?\s*(.+)",
+        )
+    else:
+        return None
+
+    stop_words = re.compile(
+        r"\b(amount|₹|inr|rs\.?|upi|transaction|reference|"
+        r"successful|completed|pending|failed|date|time|"
+        r"paid|debited|credited|received|sent|bank|balance)\b",
+        re.IGNORECASE,
+    )
+
+    for line in text.splitlines():
+        clean = re.sub(r"\s+", " ", line).strip(" :-|")
+
+        for label in labels:
+            match = re.search(label, clean, re.IGNORECASE)
+
+            if not match:
+                continue
+
+            candidate = match.group(1).strip(" :-|")
+
+            # Avoid returning an entire long OCR paragraph.
+            candidate = re.split(
+                r"\s{2,}|[|]", candidate
+            )[0].strip()
+
+            if stop_words.search(candidate):
+                candidate = stop_words.split(candidate)[0].strip(" :-|")
+
+            if (
+                2 <= len(candidate) <= 100
+                and not re.fullmatch(r"[\d\W]+", candidate)
+                and "@" not in candidate
+            ):
+                return candidate
+
+    return None
+
+
+def _classify_transaction(text):
+    """
+    Classify transaction direction from explicit words.
+
+    A possible self-transfer is flagged for review when transfer-related
+    words are present. OCR alone cannot reliably prove account ownership.
+    """
+    normalized = re.sub(r"\s+", " ", (text or "").lower())
+
+    self_transfer = bool(re.search(
+        r"\b(self\s+transfer|transferred\s+between\s+my\s+accounts|"
+        r"own\s+account|between\s+own\s+accounts)\b",
+        normalized,
+    ))
+
+    if self_transfer:
+        return "transfer", True
+
+    received = bool(re.search(
+        r"\b(money\s+received|received\s+from|you\s+received|"
+        r"credited\s+to|amount\s+credited|payment\s+received|"
+        r"credited)\b",
+        normalized,
+    ))
+
+    sent = bool(re.search(
+        r"\b(money\s+sent|you\s+paid|paid\s+to|you\s+sent|"
+        r"sent\s+to|debited|amount\s+debited|transferred\s+to|"
+        r"payment\s+sent)\b",
+        normalized,
+    ))
+
+    if received and sent:
+        return "unknown", False
+
+    if received:
+        return "money_received", False
+
+    if sent:
+        return "money_sent", False
+
+    return "unknown", False
+
+
+def parse_upi_transaction(text, filename=None):
+    """
+    Parse a UPI payment screenshot.
+
+    Returns a structured dictionary. This function does not save an expense.
+    A later backend step must handle user choice, duplicate checks and saving.
+    """
+    text = text or ""
+
+    platform = detect_upi_platform(text)
+    status = _find_transaction_status(text)
+    amount = _find_transaction_amount(text)
+    transaction_date, transaction_time = _find_transaction_datetime(text)
+
+    direction, possible_self_transfer = _classify_transaction(text)
+
+    party = _find_party(text, direction)
+    reference = _find_transaction_reference(text)
+
+    warnings = []
+
+    if not text.strip():
+        warnings.append("No readable text was detected.")
+
+    if not platform:
+        warnings.append(
+            "Payment app could not be identified. The screenshot may still "
+            "contain a readable UPI transaction."
+        )
+
+    if amount is None:
+        warnings.append(
+            "Transaction amount could not be identified confidently."
+        )
+
+    if status == "unknown":
+        warnings.append(
+            "Payment status could not be confirmed. Verify the transaction "
+            "before saving it as a completed expense."
+        )
+    elif status == "failed":
+        warnings.append(
+            "This transaction appears to have failed. Do not save it as a "
+            "completed payment without user confirmation."
+        )
+    elif status == "pending":
+        warnings.append(
+            "This transaction appears pending. Verify its final status."
+        )
+
+    if direction == "unknown":
+        warnings.append(
+            "Transaction direction could not be identified confidently."
+        )
+
+    if not transaction_date:
+        warnings.append("Transaction date could not be identified.")
+
+    if not reference:
+        warnings.append(
+            "No transaction reference was identified. Duplicate checking "
+            "may need amount, date and other available details."
+        )
+
+    if possible_self_transfer:
+        warnings.append(
+            "This may be a transfer between the user's own accounts. "
+            "Confirm before including it in spending totals."
+        )
+
+    if not party:
+        warnings.append(
+            "The sender or receiver could not be identified confidently."
+        )
+
+    # Only a possible expense, not an instruction to auto-save.
+    # The user must be able to choose to record any transaction as an expense.
+    return {
+        "transaction_type": direction,
+        "platform": platform,
+        "amount": amount,
+        "currency": parse_receipt_currency(text) or (
+            "INR" if "₹" in text or re.search(
+                r"\b(INR|Rs\.?|UPI)\b", text, re.IGNORECASE
+            ) else None
+        ),
+        "transaction_date": transaction_date,
+        "transaction_time": transaction_time,
+        "counterparty": party,
+        "transaction_reference": reference,
+        "payment_status": status,
+        "possible_self_transfer": possible_self_transfer,
+        "expense_candidate": (
+            amount is not None
+            and status == "success"
+            and direction == "money_sent"
+            and not possible_self_transfer
+        ),
+        "user_can_add_as_expense": amount is not None,
+        "warnings": warnings,
+    }
+
+
+# ---------------------------------------------------------------------
 # COMBINED PARSING AND VALIDATION INSIGHTS
 # ---------------------------------------------------------------------
 
 def parse_receipt(text, filename=None):
     """
-    Parse common receipt fields from extracted OCR text.
+    Parse receipt fields and attach UPI details when a transaction
+    screenshot is detected.
 
-    Returns:
-        A dictionary containing merchant, date, total, currency,
-        items and warnings.
+    Existing receipt fields remain available to existing callers.
     """
     text = text or ""
 
-    merchant = parse_receipt_merchant(text, filename)
-    receipt_date = parse_receipt_date(text)
-    total_amount = parse_receipt_amount(text)
-    currency = parse_receipt_currency(text)
-    items = parse_receipt_items(text)
+    upi = parse_upi_transaction(text, filename=filename)
 
-    warnings = []
-
-    if not text.strip():
-        warnings.append(
-            "No readable text was detected. Try a clearer receipt image."
+    # Prefer the dedicated UPI amount parser when a transaction screenshot
+    # has recognizable transaction labels. Avoid using arbitrary numbers.
+    is_upi_transaction = bool(
+        upi["platform"]
+        or re.search(
+            r"\b(UPI|money sent|money received|transaction successful|"
+            r"payment successful|paid to|received from|debited|credited)\b",
+            text,
+            re.IGNORECASE,
         )
+    )
 
-    if not receipt_date:
-        warnings.append(
-            "Receipt date could not be identified."
+    if is_upi_transaction:
+        total_amount = upi["amount"]
+        receipt_date = upi["transaction_date"]
+        merchant = (
+            upi["counterparty"]
+            or parse_receipt_merchant(text, filename)
         )
+        items = []
+        warnings = list(upi["warnings"])
+    else:
+        merchant = parse_receipt_merchant(text, filename)
+        receipt_date = parse_receipt_date(text)
+        total_amount = parse_receipt_amount(text)
+        items = parse_receipt_items(text)
+        warnings = []
 
-    if total_amount is None:
-        warnings.append(
-            "Receipt total could not be identified."
-        )
+        if not text.strip():
+            warnings.append(
+                "No readable text was detected. Try a clearer receipt image."
+            )
 
-    if not items:
-        warnings.append(
-            "No line items were confidently identified."
-        )
+        if not receipt_date:
+            warnings.append("Receipt date could not be identified.")
 
-    if not currency:
-        warnings.append(
-            "Currency could not be identified automatically."
-        )
+        if total_amount is None:
+            warnings.append("Receipt total could not be identified.")
 
-    return {
+        if not items:
+            warnings.append(
+                "No line items were confidently identified."
+            )
+
+        if not parse_receipt_currency(text):
+            warnings.append(
+                "Currency could not be identified automatically."
+            )
+
+    result = {
         "merchant": merchant,
         "receipt_date": receipt_date,
         "total_amount": total_amount,
-        "currency": currency,
+        "currency": upi["currency"] if is_upi_transaction else (
+            parse_receipt_currency(text)
+        ),
         "items": items,
         "warnings": warnings,
     }
 
+    if is_upi_transaction:
+        result["transaction"] = upi
+
+    return result
+
 
 def make_receipt_insights(parsed):
-    """
-    Create basic consistency checks for parsed receipt data.
-
-    The comparison is approximate because OCR may miss line items,
-    taxes, discounts or other charges.
-    """
+    """Create basic receipt consistency checks."""
     parsed = parsed or {}
 
     items = parsed.get("items") or []
     amount = parsed.get("total_amount")
 
     item_sum = round(
-        sum(
-            float(item.get("line_total") or 0)
-            for item in items
-        ),
+        sum(float(item.get("line_total") or 0) for item in items),
         2,
     )
 
@@ -600,7 +940,6 @@ def make_receipt_insights(parsed):
     if amount is not None and items:
         try:
             amount_value = float(amount)
-
             matches_receipt = (
                 abs(item_sum - amount_value)
                 <= max(1.0, amount_value * 0.05)
@@ -608,12 +947,24 @@ def make_receipt_insights(parsed):
         except (TypeError, ValueError):
             matches_receipt = None
 
+    transaction = parsed.get("transaction") or {}
+
     return {
         "item_count": len(items),
         "items_total_estimate": item_sum,
         "receipt_total": amount,
         "items_total_matches_receipt": matches_receipt,
         "review_recommended": bool(parsed.get("warnings")),
+        "is_upi_transaction": bool(transaction),
+        "transaction_type": transaction.get("transaction_type"),
+        "payment_status": transaction.get("payment_status"),
+        "transaction_reference_available": bool(
+            transaction.get("transaction_reference")
+        ),
+        "expense_candidate": transaction.get("expense_candidate", False),
+        "user_can_add_as_expense": transaction.get(
+            "user_can_add_as_expense", False
+        ),
     }
 
 
@@ -624,10 +975,9 @@ def process_receipt(
     tesseract_cmd=None,
 ):
     """
-    Extract text and parse a receipt in one call.
+    Extract text and parse a receipt or UPI screenshot in one call.
 
     This function does not save expenses or write to the database.
-    Those responsibilities remain with the application's backend.
     """
     extracted_text = extract_receipt_text(
         filename=filename,

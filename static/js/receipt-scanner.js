@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentReceiptId = null;
     let currentExpenseId = null;
+    let currentTransaction = null;
+    let transactionChoiceBusy = false;
+    let transactionPanel = null;
 
     // -------------------- INITIALIZATION --------------------
 
@@ -268,6 +271,11 @@ document.addEventListener("DOMContentLoaded", () => {
         expenseAlreadySaved = false;
         currentReceiptId = null;
         currentExpenseId = null;
+        currentTransaction = null;
+        if (transactionPanel) {
+            transactionPanel.hidden = true;
+            transactionPanel.replaceChildren();
+        }
 
         if (saveButton) {
             saveButton.disabled = false;
@@ -397,6 +405,237 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function getOrCreateTransactionPanel() {
+        if (transactionPanel) {
+            return transactionPanel;
+        }
+
+        transactionPanel = document.getElementById("upiTransactionPanel");
+
+        if (!transactionPanel && resultsSection) {
+            transactionPanel = document.createElement("section");
+            transactionPanel.id = "upiTransactionPanel";
+            transactionPanel.className = "receipt-transaction-panel";
+            transactionPanel.setAttribute("aria-labelledby", "upiTransactionHeading");
+            transactionPanel.hidden = true;
+
+            // Keep the UPI panel inside the results area and outside the expense
+            // form so its action buttons never submit the expense form by accident.
+            if (expenseForm && expenseForm.parentNode === resultsSection) {
+                resultsSection.insertBefore(transactionPanel, expenseForm);
+            } else {
+                resultsSection.appendChild(transactionPanel);
+            }
+        }
+
+        return transactionPanel;
+    }
+
+    function appendDetail(container, label, value) {
+        if (value === null || value === undefined || String(value).trim() === "") {
+            return;
+        }
+
+        const row = document.createElement("p");
+        row.className = "receipt-transaction-detail";
+        const strong = document.createElement("strong");
+        strong.textContent = `${label}: `;
+        const text = document.createElement("span");
+        text.textContent = String(value);
+        row.append(strong, text);
+        container.appendChild(row);
+    }
+
+    function normalizeTransaction(data, receipt) {
+        return data?.transaction || receipt?.transaction || null;
+    }
+
+    function renderTransactionPanel(data, receipt) {
+        const panel = getOrCreateTransactionPanel();
+        if (!panel) return;
+
+        const transaction = normalizeTransaction(data, receipt);
+        currentTransaction = transaction;
+        panel.replaceChildren();
+
+        if (!transaction) {
+            panel.hidden = true;
+            return;
+        }
+
+        panel.hidden = false;
+        const heading = document.createElement("h3");
+        heading.id = "upiTransactionHeading";
+        heading.textContent = "UPI transaction details";
+        panel.appendChild(heading);
+
+        const description = document.createElement("p");
+        description.textContent = "Review the detected payment information before deciding whether to add it to expenses.";
+        panel.appendChild(description);
+
+        appendDetail(panel, "Payment app", transaction.platform || "Not identified");
+        appendDetail(panel, "Transaction type", transaction.transaction_type || "Not identified");
+        appendDetail(panel, "Amount", transaction.amount != null ? `₹${transaction.amount}` : (receipt?.total_amount != null ? `₹${receipt.total_amount}` : "Not detected"));
+        appendDetail(panel, "Date", transaction.transaction_date || receipt?.receipt_date || "Not detected");
+        appendDetail(panel, "Time", transaction.transaction_time);
+        appendDetail(panel, "Sender / receiver", transaction.counterparty || receipt?.merchant || "Not identified");
+        appendDetail(panel, "Reference", transaction.transaction_reference);
+        appendDetail(panel, "Payment status", transaction.payment_status || "Unknown");
+
+        if (transaction.possible_self_transfer) {
+            const note = document.createElement("p");
+            note.className = "receipt-transaction-warning";
+            note.textContent = "This may be a transfer between your own accounts. Add it only if you want it recorded as an expense.";
+            panel.appendChild(note);
+        }
+
+        const warnings = Array.isArray(data?.warnings)
+            ? data.warnings
+            : (Array.isArray(receipt?.warnings) ? receipt.warnings : []);
+
+        if (warnings.length) {
+            const warningList = document.createElement("ul");
+            warningList.className = "receipt-transaction-warnings";
+            warnings.forEach((warning) => {
+                if (!warning) return;
+                const item = document.createElement("li");
+                item.textContent = String(warning);
+                warningList.appendChild(item);
+            });
+            panel.appendChild(warningList);
+        }
+
+        const alreadySaved = data?.expense_created === true || Boolean(data?.expense_id || receipt?.expense_id);
+        const canOfferChoice = !alreadySaved
+            && !data?.duplicate_type
+            && Boolean(selectedFile)
+            && Number(transaction.amount ?? receipt?.total_amount) > 0;
+
+        if (alreadySaved) {
+            const saved = document.createElement("p");
+            saved.className = "receipt-transaction-success";
+            saved.textContent = "This transaction is already linked to an expense. No additional expense will be created.";
+            panel.appendChild(saved);
+            return;
+        }
+
+        if (!canOfferChoice) {
+            const note = document.createElement("p");
+            note.textContent = data?.duplicate
+                ? "A matching transaction was found. Review the duplicate warning before trying to add it again."
+                : "An expense cannot be created until a valid transaction amount is available.";
+            panel.appendChild(note);
+            return;
+        }
+
+        const actionRow = document.createElement("div");
+        actionRow.className = "receipt-transaction-actions";
+
+        const addButton = document.createElement("button");
+        addButton.type = "button";
+        addButton.className = "receipt-transaction-add-button";
+        addButton.textContent = "Add this transaction as an expense";
+        addButton.addEventListener("click", () => submitTransactionChoice(true, addButton, skipButton));
+
+        const skipButton = document.createElement("button");
+        skipButton.type = "button";
+        skipButton.className = "receipt-transaction-skip-button";
+        skipButton.textContent = "Keep as receipt only";
+        skipButton.addEventListener("click", () => {
+            panel.querySelectorAll("button").forEach((button) => {
+                button.disabled = true;
+            });
+            setStatus(resultsStatus, "Saved as a receipt only. No expense was added by this choice.", "info");
+        });
+
+        actionRow.append(addButton, skipButton);
+        panel.appendChild(actionRow);
+
+        const helper = document.createElement("p");
+        helper.className = "receipt-transaction-help";
+        helper.textContent = "Your choice is sent to the existing scan endpoint. Confirm that the payment and amount are correct before adding it.";
+        panel.appendChild(helper);
+    }
+
+    async function submitTransactionChoice(addAsExpense, addButton, skipButton) {
+        if (transactionChoiceBusy || isScanning || isSaving) return;
+
+        if (!selectedFile) {
+            setStatus(resultsStatus, "Please select and scan the same transaction screenshot again.", "error");
+            return;
+        }
+
+        const transaction = currentTransaction || {};
+        const amount = Number(transaction.amount);
+        if (addAsExpense && (!Number.isFinite(amount) || amount <= 0)) {
+            setStatus(resultsStatus, "The transaction amount is missing or invalid. Please review the screenshot.", "error");
+            return;
+        }
+
+        const status = String(transaction.payment_status || "unknown").toLowerCase();
+        if (addAsExpense && (status === "failed" || status === "pending" || status === "unknown")) {
+            const confirmed = window.confirm(
+                `The payment status is ${status}. Have you verified this transaction in your payment app and do you still want to add it as an expense?`
+            );
+            if (!confirmed) return;
+        }
+
+        if (addAsExpense) {
+            const confirmed = window.confirm(
+                "Add this transaction to your expenses? This action will create an expense record if the backend confirms it can be saved."
+            );
+            if (!confirmed) return;
+        }
+
+        transactionChoiceBusy = true;
+        if (addButton) {
+            addButton.disabled = true;
+            addButton.textContent = addAsExpense ? "Adding expense..." : "Please wait...";
+        }
+        if (skipButton) skipButton.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append("file", selectedFile, selectedFile.name);
+            formData.append("add_as_expense", addAsExpense ? "true" : "false");
+
+            const data = await apiRequest("/api/receipts/scan", {
+                method: "POST",
+                body: formData
+            });
+
+            const receipt = data?.receipt;
+            if (!receipt) {
+                throw new Error("The server response did not include receipt details.");
+            }
+
+            updateSaveButton(data, receipt);
+            renderTransactionPanel(data, receipt);
+
+            if (data.expense_created === true || data.expense_id || receipt.expense_id) {
+                expenseAlreadySaved = true;
+                setStatus(resultsStatus, data.msg || "Transaction added to expenses successfully.", "success");
+                setStatus(statusElement, "UPI transaction expense saved successfully.", "success");
+            } else {
+                setStatus(resultsStatus, data.msg || "The transaction remains saved as a receipt only.", "info");
+            }
+
+            if (Array.isArray(data.warnings) && data.warnings.length) {
+                showWarnings(data.warnings);
+            }
+        } catch (error) {
+            console.error("UPI expense choice failed:", error);
+            setStatus(resultsStatus, error.message || "Unable to add this transaction as an expense.", "error");
+            if (addButton) {
+                addButton.disabled = false;
+                addButton.textContent = "Add this transaction as an expense";
+            }
+            if (skipButton) skipButton.disabled = false;
+        } finally {
+            transactionChoiceBusy = false;
+        }
+    }
+
     function fillExpenseDetails(receipt) {
         if (!receipt) {
             return;
@@ -472,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setStatus(
             resultsStatus,
             message,
-            "error"
+            "warning"
         );
     }
 
@@ -638,6 +877,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             fillExpenseDetails(receipt);
             updateSaveButton(data, receipt);
+            renderTransactionPanel(data, receipt);
 
             const isDuplicate = data.duplicate === true;
 

@@ -23,6 +23,9 @@ from fpdf import FPDF
 import os
 import threading
 
+# UPI-aware receipt parsing is kept in the dedicated service module.
+from services.receipt_ocr import parse_upi_transaction
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -1635,9 +1638,99 @@ def scan_receipt():
             "code": "RECEIPT_STORAGE_UNAVAILABLE",
         }), 503
     if existing:
+        # If the user explicitly chooses to add a previously scanned UPI
+        # transaction, allow promotion of that saved receipt into an expense.
+        # This makes the user-choice flow work even when the same screenshot
+        # is submitted a second time.
+        add_choice = (request.form.get("add_as_expense") or "").strip().lower()
+        wants_expense = add_choice in {"1", "true", "yes", "on"}
+        saved_transaction = existing.get("transaction") or {}
+        promoted_expense_id = existing.get("expense_id")
+
+        if wants_expense and saved_transaction and not promoted_expense_id:
+            try:
+                reference = saved_transaction.get("transaction_reference")
+                prior_expense = None
+                if reference:
+                    prior_expense = mongo.db.expenses.find_one({
+                        "user_id": user_id,
+                        "transaction_reference": reference,
+                    })
+
+                if prior_expense:
+                    promoted_expense_id = str(prior_expense["_id"])
+                    mongo.db.receipts.update_one(
+                        {"_id": existing["_id"], "user_id": user_id},
+                        {"$set": {"expense_id": promoted_expense_id}},
+                    )
+                else:
+                    saved_amount = existing.get("total_amount")
+                    if saved_amount is None or float(saved_amount) <= 0:
+                        return jsonify({
+                            "msg": "The transaction amount is missing or invalid. Please scan a clearer screenshot.",
+                            "duplicate": True,
+                            "expense_created": False,
+                            "receipt": _receipt_json_safe(existing),
+                            "warnings": existing.get("warnings", []),
+                        }), 200
+
+                    saved_date = (
+                        saved_transaction.get("transaction_date")
+                        or existing.get("receipt_date")
+                        or datetime.now().date().isoformat()
+                    )
+                    expense_doc = {
+                        "user_id": user_id,
+                        "amount": float(saved_amount),
+                        "category": "Other",
+                        "currency": existing.get("currency") or "INR",
+                        "date": saved_date,
+                        "source": "upi_transaction",
+                        "merchant": existing.get("merchant") or "UPI transaction",
+                        "items": existing.get("items") or [],
+                        "receipt_id": str(existing["_id"]),
+                        "transaction_type": saved_transaction.get("transaction_type"),
+                        "transaction_reference": reference,
+                        "payment_status": saved_transaction.get("payment_status"),
+                        "payment_platform": saved_transaction.get("platform"),
+                        "counterparty": saved_transaction.get("counterparty"),
+                        "transaction_time": saved_transaction.get("transaction_time"),
+                        "possible_self_transfer": bool(saved_transaction.get("possible_self_transfer")),
+                        "user_confirmed_expense": True,
+                    }
+                    expense_result = mongo.db.expenses.insert_one(expense_doc)
+                    promoted_expense_id = str(expense_result.inserted_id)
+                    link_result = mongo.db.receipts.update_one(
+                        {"_id": existing["_id"], "user_id": user_id},
+                        {"$set": {"expense_id": promoted_expense_id}},
+                    )
+                    if link_result.matched_count != 1:
+                        mongo.db.expenses.delete_one({
+                            "_id": expense_result.inserted_id,
+                            "user_id": user_id,
+                        })
+                        raise RuntimeError("Receipt-to-expense link could not be saved.")
+
+                    existing["expense_id"] = promoted_expense_id
+            except Exception:
+                app.logger.exception("Could not add previously scanned UPI transaction as expense")
+                return jsonify({
+                    "msg": "The transaction was already scanned, but could not be added as an expense. Please try again.",
+                    "code": "UPI_EXPENSE_SAVE_FAILED",
+                    "duplicate": True,
+                    "expense_created": False,
+                    "receipt": _receipt_json_safe(existing),
+                }), 503
+
         return jsonify({
-            "msg": "This receipt has already been scanned. No duplicate expense was created.",
+            "msg": (
+                "Previously scanned UPI transaction added as an expense."
+                if promoted_expense_id and wants_expense
+                else "This receipt has already been scanned. No duplicate expense was created."
+            ),
             "duplicate": True,
+            "expense_created": bool(promoted_expense_id),
+            "expense_id": promoted_expense_id,
             "receipt": _receipt_json_safe(existing),
             "warnings": ["Duplicate file detected; existing saved receipt returned."],
         }), 200
@@ -1658,14 +1751,76 @@ def scan_receipt():
     warnings = []
     if not extracted_text:
         warnings.append("No readable text was detected. Try a sharper, well-lit image or a text-based PDF.")
-    merchant = _receipt_parse_merchant(extracted_text, safe_name) if extracted_text else os.path.splitext(safe_name)[0][:120]
-    total_amount = _receipt_parse_amount(extracted_text) if extracted_text else None
-    receipt_date = _receipt_parse_date(extracted_text) if extracted_text else None
-    currency = _receipt_parse_currency(extracted_text) if extracted_text else None
-    items = _receipt_parse_items(extracted_text) if extracted_text else []
+
+    # Keep the existing receipt parser for normal shopping receipts, and use
+    # the dedicated service for payment-app transaction screenshots.
+    try:
+        upi_transaction = parse_upi_transaction(extracted_text, filename=safe_name)
+    except Exception:
+        app.logger.exception("UPI transaction parsing failed; falling back to receipt parsing")
+        upi_transaction = None
+
+    is_upi_transaction = bool(
+        upi_transaction and (
+            upi_transaction.get("platform")
+            or re.search(
+                r"\b(UPI|money sent|money received|you paid|paid to|received from|"
+                r"debited|credited|transaction successful|payment successful)\b",
+                extracted_text or "", re.I
+            )
+        )
+    )
+
+    if is_upi_transaction:
+        merchant = (
+            upi_transaction.get("counterparty")
+            or _receipt_parse_merchant(extracted_text, safe_name)
+        )
+        total_amount = upi_transaction.get("amount")
+        receipt_date = upi_transaction.get("transaction_date")
+        currency = upi_transaction.get("currency") or _receipt_parse_currency(extracted_text) or "INR"
+        items = []
+        warnings.extend(upi_transaction.get("warnings") or [])
+    else:
+        merchant = _receipt_parse_merchant(extracted_text, safe_name) if extracted_text else os.path.splitext(safe_name)[0][:120]
+        total_amount = _receipt_parse_amount(extracted_text) if extracted_text else None
+        receipt_date = _receipt_parse_date(extracted_text) if extracted_text else None
+        currency = _receipt_parse_currency(extracted_text) if extracted_text else None
+        items = _receipt_parse_items(extracted_text) if extracted_text else []
+
     extraction_confidence = _receipt_extraction_confidence(
         extracted_text, merchant, receipt_date, total_amount, currency, items, safe_name
     )
+
+    # UPI duplicate detection: transaction references are the strongest signal.
+    # The lookup is user-scoped and does not expose another user's records.
+    if is_upi_transaction and upi_transaction.get("transaction_reference"):
+        transaction_reference = upi_transaction["transaction_reference"]
+        try:
+            prior_receipt = mongo.db.receipts.find_one({
+                "user_id": user_id,
+                "transaction.transaction_reference": transaction_reference,
+            })
+            prior_expense = mongo.db.expenses.find_one({
+                "user_id": user_id,
+                "transaction_reference": transaction_reference,
+            })
+        except Exception:
+            app.logger.exception("UPI transaction duplicate check failed")
+            return jsonify({
+                "msg": "Transaction duplicate verification is temporarily unavailable. Please try again.",
+                "code": "RECEIPT_DUPLICATE_CHECK_FAILED",
+            }), 503
+
+        if prior_receipt or prior_expense:
+            return jsonify({
+                "msg": "This UPI transaction reference has already been recorded. No duplicate expense was created.",
+                "duplicate": True,
+                "duplicate_type": "transaction_reference",
+                "receipt": _receipt_json_safe(prior_receipt) if prior_receipt else None,
+                "expense_id": str(prior_expense.get("_id")) if prior_expense else None,
+                "warnings": ["Duplicate UPI transaction reference detected."],
+            }), 200
 
     # Content-based duplicate check catches the same bill uploaded as a different
     # photo, re-encoded image, or PDF. The helper requires matching merchant,
@@ -1693,14 +1848,15 @@ def scan_receipt():
         }), 200
 
     if total_amount is None:
-        warnings.append("Total amount could not be confidently detected; no expense was auto-created.")
+        warnings.append("Transaction/receipt amount could not be confidently detected; no expense was auto-created.")
     if not receipt_date:
-        warnings.append("Receipt date was not detected; today's date is used for the expense. Please review it.")
-    if not items:
+        warnings.append("Date was not detected; today's date is used for a saved expense. Please review it.")
+    if not items and not is_upi_transaction:
         warnings.append("No line items were detected. You can still review the receipt and extracted total.")
     if not currency:
         warnings.append("Currency was not detected; INR is used as the default currency. Please review it.")
-    if total_amount is not None and extraction_confidence["total_amount"] < 0.8:
+    if (not is_upi_transaction and total_amount is not None
+            and extraction_confidence["total_amount"] < 0.8):
         warnings.append("The total amount was estimated without a clear payable-total label. Please verify it before relying on the expense.")
     if merchant == os.path.splitext(safe_name)[0][:120] and not extracted_text.strip():
         warnings.append("Merchant name could not be extracted from the receipt. Please review it.")
@@ -1722,6 +1878,9 @@ def scan_receipt():
         "warnings": warnings,
         "extraction_confidence": extraction_confidence,
     }
+    if is_upi_transaction:
+        parsed["transaction"] = upi_transaction
+
     receipt_doc = {
         "user_id": user_id,
         "original_filename": safe_name,
@@ -1742,6 +1901,8 @@ def scan_receipt():
         "created_at": datetime.now(timezone.utc),
         "expense_id": None,
     }
+    if is_upi_transaction:
+        receipt_doc["transaction"] = upi_transaction
     try:
         receipt_result = mongo.db.receipts.insert_one(receipt_doc)
     except Exception:
@@ -1753,23 +1914,59 @@ def scan_receipt():
 
     receipt_id = str(receipt_result.inserted_id)
 
-    # Auto-save to the existing expenses collection when a positive total was found.
+    # Normal receipts retain their existing automatic-save behavior. For UPI,
+    # automatically save completed outgoing payments; received payments,
+    # ambiguous transactions and possible self-transfers require the explicit
+    # add_as_expense=true form field so the user's choice is respected.
+    add_as_expense_value = (request.form.get("add_as_expense") or "").strip().lower()
+    explicit_add_as_expense = add_as_expense_value in {"1", "true", "yes", "on"}
+    explicit_skip_expense = add_as_expense_value in {"0", "false", "no", "off"}
+
+    if is_upi_transaction:
+        safe_upi_auto_save = (
+            upi_transaction.get("payment_status") == "success"
+            and upi_transaction.get("transaction_type") == "money_sent"
+            and not upi_transaction.get("possible_self_transfer")
+        )
+        should_create_expense = (
+            explicit_add_as_expense
+            or (safe_upi_auto_save and not explicit_skip_expense)
+        )
+        if not should_create_expense:
+            if upi_transaction.get("payment_status") != "success":
+                warnings.append("UPI transaction was not auto-added because payment success could not be confirmed. Submit add_as_expense=true only if you have verified it and want to record it.")
+            elif upi_transaction.get("transaction_type") != "money_sent" or upi_transaction.get("possible_self_transfer"):
+                warnings.append("This UPI transaction needs your choice before it is added as an expense. Resubmit with add_as_expense=true if you want to record it.")
+    else:
+        should_create_expense = not explicit_skip_expense
+
     # Keep receipt/expense linkage consistent if either database write fails.
     expense_id = None
-    if total_amount is not None and total_amount > 0:
+    if should_create_expense and total_amount is not None and total_amount > 0:
         expense_result = None
         try:
             expense_doc = {
                 "user_id": user_id,
                 "amount": total_amount,
-                "category": "Shopping" if re.search(r"(market|mart|store|supermarket|grocery|retail)", merchant, re.I) else "Other",
+                "category": "Shopping" if (not is_upi_transaction and re.search(r"(market|mart|store|supermarket|grocery|retail)", merchant, re.I)) else "Other",
                 "currency": effective_currency,
                 "date": effective_date,
-                "source": "receipt_scanner",
+                "source": "upi_transaction" if is_upi_transaction else "receipt_scanner",
                 "merchant": merchant,
                 "items": items,
                 "receipt_id": receipt_id,
             }
+            if is_upi_transaction:
+                expense_doc.update({
+                    "transaction_type": upi_transaction.get("transaction_type"),
+                    "transaction_reference": upi_transaction.get("transaction_reference"),
+                    "payment_status": upi_transaction.get("payment_status"),
+                    "payment_platform": upi_transaction.get("platform"),
+                    "counterparty": upi_transaction.get("counterparty"),
+                    "transaction_time": upi_transaction.get("transaction_time"),
+                    "possible_self_transfer": bool(upi_transaction.get("possible_self_transfer")),
+                    "user_confirmed_expense": explicit_add_as_expense,
+                })
             expense_result = mongo.db.expenses.insert_one(expense_doc)
             expense_id = str(expense_result.inserted_id)
             link_result = mongo.db.receipts.update_one(
@@ -1807,14 +2004,36 @@ def scan_receipt():
                     "receipt_id": receipt_id,
                 }), 503
 
+    # Persist warnings added during the save decision so receipt history reflects
+    # why an UPI transaction was not automatically added as an expense.
+    if warnings != receipt_doc.get("warnings", []):
+        receipt_doc["warnings"] = warnings
+        receipt_doc["status"] = "needs_review"
+        try:
+            mongo.db.receipts.update_one(
+                {"_id": receipt_result.inserted_id, "user_id": user_id},
+                {"$set": {"warnings": warnings, "status": "needs_review"}},
+            )
+        except Exception:
+            app.logger.exception("Could not update receipt warnings")
+
     receipt_doc["_id"] = receipt_result.inserted_id
     parsed["warnings"] = warnings
     return jsonify({
-        "msg": "Receipt scanned and saved. Please review any warnings before relying on extracted values.",
+        "msg": (
+            "Transaction scanned and expense saved. Please review any warnings."
+            if expense_id is not None and is_upi_transaction
+            else "Receipt scanned and saved. Please review any warnings before relying on extracted values."
+        ),
         "duplicate": False,
         "receipt": _receipt_json_safe(receipt_doc),
         "expense_created": expense_id is not None,
         "expense_id": expense_id,
+        "transaction": upi_transaction if is_upi_transaction else None,
+        "requires_expense_choice": bool(
+            is_upi_transaction and expense_id is None and total_amount is not None
+            and not explicit_skip_expense
+        ),
         "insights": _receipt_make_insights(parsed),
         "warnings": warnings,
     }), 201
