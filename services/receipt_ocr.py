@@ -5,6 +5,7 @@ Responsibilities:
 - Extract text from receipt images and PDF files.
 - Preprocess images to improve OCR results.
 - Parse receipt date, total amount, currency, merchant, and line items.
+- Parse common UPI transaction details.
 - Generate basic receipt validation insights.
 
 Optional dependencies:
@@ -35,7 +36,6 @@ ALLOWED_RECEIPT_EXTENSIONS = {
     "pdf",
 }
 
-# Common Windows installation location.
 WINDOWS_TESSERACT_PATH = (
     r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 )
@@ -46,18 +46,7 @@ WINDOWS_TESSERACT_PATH = (
 # ---------------------------------------------------------------------
 
 def _configure_tesseract(pytesseract, tesseract_cmd=None):
-    """
-    Configure the Tesseract executable.
-
-    Priority:
-    1. Explicit tesseract_cmd argument.
-    2. TESSERACT_CMD environment variable.
-    3. Executable available on the system PATH.
-    4. Common Windows installation path.
-
-    Raises:
-        RuntimeError: If no usable executable can be located.
-    """
+    """Configure the Tesseract executable."""
     executable = (
         tesseract_cmd
         or os.environ.get("TESSERACT_CMD")
@@ -67,9 +56,6 @@ def _configure_tesseract(pytesseract, tesseract_cmd=None):
         executable = os.path.expandvars(
             os.path.expanduser(executable)
         )
-
-        # Preserve explicit configuration and let pytesseract
-        # report a clear error if the supplied path is invalid.
         pytesseract.pytesseract.tesseract_cmd = executable
         return executable
 
@@ -124,22 +110,7 @@ def extract_receipt_text(
     ocr_language=None,
     tesseract_cmd=None,
 ):
-    """
-    Extract text from an uploaded receipt image or PDF.
-
-    Args:
-        filename: Original uploaded filename.
-        content: File contents as bytes.
-        ocr_language: Optional Tesseract language, e.g. "eng".
-        tesseract_cmd: Optional path to the Tesseract executable.
-
-    Returns:
-        Extracted receipt text as a string.
-
-    Raises:
-        ValueError: If the file cannot be processed.
-        RuntimeError: If a required dependency or OCR engine is missing.
-    """
+    """Extract text from an uploaded receipt image or PDF."""
     if not filename:
         raise ValueError("A receipt filename is required.")
 
@@ -196,7 +167,6 @@ def _extract_image_text(
             image = ImageOps.exif_transpose(source_image)
             image = image.convert("RGB")
 
-        # Basic preprocessing for common receipt photographs.
         image = ImageOps.grayscale(image)
         image = ImageOps.autocontrast(image)
         image = image.filter(ImageFilter.SHARPEN)
@@ -214,7 +184,8 @@ def _extract_image_text(
         _raise_tesseract_error(pytesseract, exc)
 
         raise ValueError(
-            "The image could not be processed. Try a clearer JPG or PNG image."
+            "The image could not be processed. "
+            "Try a clearer JPG or PNG image."
         ) from exc
 
 
@@ -227,7 +198,7 @@ def _extract_pdf_text(
     text_parts = []
 
     try:
-        import fitz  # PyMuPDF
+        import fitz
     except ImportError:
         fitz = None
 
@@ -247,55 +218,47 @@ def _extract_pdf_text(
                     text_parts.append(page_text)
                     continue
 
-                # Limit OCR attempts to the first three pages
-                # without embedded text.
-                if len(text_parts) < 3:
-                    try:
-                        import pytesseract
-                        from PIL import Image
+                try:
+                    import pytesseract
+                    from PIL import Image
 
-                        _configure_tesseract(
+                    _configure_tesseract(
+                        pytesseract,
+                        tesseract_cmd,
+                    )
+
+                    pixmap = page.get_pixmap(
+                        matrix=fitz.Matrix(2, 2),
+                        alpha=False,
+                    )
+
+                    with Image.open(
+                        io.BytesIO(pixmap.tobytes("png"))
+                    ) as page_image:
+                        options = {}
+
+                        if ocr_language:
+                            options["lang"] = ocr_language
+
+                        page_ocr_text = (
+                            pytesseract.image_to_string(
+                                page_image,
+                                **options,
+                            )
+                            or ""
+                        )
+
+                    text_parts.append(page_ocr_text)
+
+                except ImportError:
+                    pass
+
+                except Exception as exc:
+                    if "pytesseract" in locals():
+                        _raise_tesseract_error(
                             pytesseract,
-                            tesseract_cmd,
+                            exc,
                         )
-
-                        pixmap = page.get_pixmap(
-                            matrix=fitz.Matrix(2, 2),
-                            alpha=False,
-                        )
-
-                        with Image.open(
-                            io.BytesIO(pixmap.tobytes("png"))
-                        ) as page_image:
-                            options = {}
-
-                            if ocr_language:
-                                options["lang"] = ocr_language
-
-                            page_ocr_text = (
-                                pytesseract.image_to_string(
-                                    page_image,
-                                    **options,
-                                )
-                                or ""
-                            )
-
-                        text_parts.append(page_ocr_text)
-
-                    except ImportError:
-                        # Embedded PDF text may still be available.
-                        pass
-
-                    except Exception as exc:
-                        if "pytesseract" in locals():
-                            _raise_tesseract_error(
-                                pytesseract,
-                                exc,
-                            )
-
-                        # Preserve embedded text if optional OCR
-                        # dependencies are unavailable.
-                        pass
 
             return "\n".join(text_parts).strip()
 
@@ -312,7 +275,6 @@ def _extract_pdf_text(
             if document is not None:
                 document.close()
 
-    # Fallback for text-based PDFs when PyMuPDF is unavailable.
     try:
         from pypdf import PdfReader
     except ImportError as exc:
@@ -326,7 +288,8 @@ def _extract_pdf_text(
 
         if reader.is_encrypted:
             raise ValueError(
-                "Encrypted PDFs are not supported. Upload an unencrypted PDF."
+                "Encrypted PDFs are not supported. "
+                "Upload an unencrypted PDF."
             )
 
         for page in reader.pages[:20]:
@@ -348,16 +311,7 @@ def _extract_pdf_text(
 # ---------------------------------------------------------------------
 
 def parse_receipt_date(text):
-    """
-    Find a recognizable receipt date and return YYYY-MM-DD.
-
-    Supports:
-    - YYYY-MM-DD
-    - YYYY/MM/DD
-    - YYYY.MM.DD
-    - DD-MM-YYYY and corresponding slash/dot formats
-    - DD Month YYYY, e.g. 14 October 2026
-    """
+    """Find a recognizable date and return YYYY-MM-DD."""
     if not text:
         return None
 
@@ -420,14 +374,7 @@ def parse_receipt_date(text):
 
 
 def parse_receipt_amount(text):
-    """
-    Extract a likely grand total.
-
-    Total-labelled lines are preferred. If no such line is found,
-    the parser falls back to amounts found anywhere in the text.
-
-    This is a heuristic; ambiguous results should be reviewed.
-    """
+    """Extract a likely grand total from receipt text."""
     if not text:
         return None
 
@@ -478,10 +425,7 @@ def parse_receipt_amount(text):
         except InvalidOperation:
             continue
 
-    if not parsed:
-        return None
-
-    return float(max(parsed))
+    return float(max(parsed)) if parsed else None
 
 
 def parse_receipt_currency(text):
@@ -507,11 +451,7 @@ def parse_receipt_currency(text):
 
 
 def parse_receipt_merchant(text, filename=None):
-    """
-    Guess the merchant from the first few lines of receipt text.
-
-    Falls back to the filename if no likely merchant is identified.
-    """
+    """Guess the merchant from receipt text or its filename."""
     ignored = re.compile(
         r"(receipt|invoice|tax invoice|bill no|invoice no|date|time|"
         r"cashier|gstin|\bphone\b|\bwww\.|http|\btotal\b|\bamount\b)",
@@ -537,12 +477,7 @@ def parse_receipt_merchant(text, filename=None):
 
 
 def parse_receipt_items(text):
-    """
-    Heuristically identify receipt line items.
-
-    Returns dictionaries containing name, line_total and quantity.
-    These estimates depend on OCR quality and receipt layout.
-    """
+    """Heuristically identify receipt line items."""
     items = []
 
     if not text:
@@ -598,15 +533,303 @@ def parse_receipt_items(text):
 
 
 # ---------------------------------------------------------------------
+# UPI TRANSACTION PARSING
+# ---------------------------------------------------------------------
+
+def parse_upi_transaction(text, filename=None):
+    """
+    Parse common UPI transaction text.
+
+    Returns a dictionary compatible with app.py, or None if the text
+    does not contain convincing evidence of a UPI/payment transaction.
+
+    This is heuristic OCR parsing, not bank-side transaction verification.
+    """
+    text = text or ""
+
+    if not text.strip():
+        return None
+
+    upi_evidence = re.search(
+        r"\b(UPI|VPA|UTR|RRN|Google Pay|GPay|PhonePe|Paytm|BHIM|"
+        r"Amazon Pay|WhatsApp Pay|CRED)\b",
+        text,
+        re.IGNORECASE,
+    )
+
+    payment_evidence = re.search(
+        r"\b(money sent|money received|paid to|received from|"
+        r"payment successful|transaction successful|"
+        r"transaction ID|UPI ID|debited|credited)\b",
+        text,
+        re.IGNORECASE,
+    )
+
+    if not upi_evidence and not payment_evidence:
+        return None
+
+    warnings = []
+
+    # Identify the payment application.
+    platform = None
+    platform_patterns = [
+        (r"\b(?:Google\s*Pay|GPay|G\s*Pay)\b", "Google Pay"),
+        (r"\bPhonePe\b", "PhonePe"),
+        (r"\bPaytm\b", "Paytm"),
+        (r"\bBHIM\b", "BHIM"),
+        (r"\bAmazon\s*Pay\b", "Amazon Pay"),
+        (r"\bWhatsApp\s*Pay\b", "WhatsApp Pay"),
+        (r"\bCRED\b", "CRED"),
+    ]
+
+    for pattern, name in platform_patterns:
+        if re.search(pattern, text, re.IGNORECASE):
+            platform = name
+            break
+
+    if platform is None and re.search(r"\bUPI\b", text, re.IGNORECASE):
+        platform = "UPI"
+
+    # Determine whether money was sent or received.
+    sent_pattern = (
+        r"\b(money sent|you paid|paid to|sent to|"
+        r"payment sent|debited|successfully paid)\b"
+    )
+    received_pattern = (
+        r"\b(money received|you received|received from|"
+        r"payment received|credited)\b"
+    )
+
+    money_sent = bool(
+        re.search(sent_pattern, text, re.IGNORECASE)
+    )
+    money_received = bool(
+        re.search(received_pattern, text, re.IGNORECASE)
+    )
+
+    if money_sent and not money_received:
+        transaction_type = "money_sent"
+    elif money_received and not money_sent:
+        transaction_type = "money_received"
+    else:
+        transaction_type = None
+
+    # Only mark success when an explicit success phrase is present.
+    failed_payment = bool(re.search(
+        r"\b(failed|failure|declined|cancelled|canceled|"
+        r"unsuccessful|reversed)\b",
+        text,
+        re.IGNORECASE,
+    ))
+
+    pending_payment = bool(re.search(
+        r"\b(pending|processing|in progress)\b",
+        text,
+        re.IGNORECASE,
+    ))
+
+    successful_payment = bool(re.search(
+        r"\b(payment successful|transaction successful|"
+        r"successfully paid|successfully sent|"
+        r"payment completed|transaction completed|"
+        r"completed successfully|paid successfully)\b",
+        text,
+        re.IGNORECASE,
+    ))
+
+    if failed_payment:
+        payment_status = "failed"
+    elif pending_payment:
+        payment_status = "pending"
+    elif successful_payment:
+        payment_status = "success"
+    else:
+        payment_status = "unknown"
+
+    # A conservative self-transfer warning.
+    possible_self_transfer = bool(re.search(
+        r"\b(self transfer|self-transfer|own account|"
+        r"transfer to self|transferred to own account)\b",
+        text,
+        re.IGNORECASE,
+    ))
+
+    # Extract counterparty from labelled fields or common phrases.
+    counterparty = None
+
+    counterparty_patterns = [
+        r"\bpaid\s+to\s*[:\-]?\s*([^\r\n]+)",
+        r"\bsent\s+to\s*[:\-]?\s*([^\r\n]+)",
+        r"\breceived\s+from\s*[:\-]?\s*([^\r\n]+)",
+        r"\bcredited\s+by\s*[:\-]?\s*([^\r\n]+)",
+        r"\b(?:recipient|merchant|counterparty)\s*[:\-]\s*([^\r\n]+)",
+        r"^\s*(?:to|from)\s*[:\-]\s*([^\r\n]+)",
+    ]
+
+    # Stop at common metadata labels that may follow the name.
+    trailing_metadata = re.compile(
+        r"\s+(?:UPI\s*ID|VPA|transaction\s*(?:ID|reference)|"
+        r"UTR|RRN|date|time|amount|status)\b.*$",
+        re.IGNORECASE,
+    )
+
+    for pattern in counterparty_patterns:
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+
+        if not match:
+            continue
+
+        candidate = re.sub(
+            r"\s+",
+            " ",
+            match.group(1),
+        ).strip(" \t:|,-")
+
+        candidate = trailing_metadata.sub("", candidate).strip(
+            " \t:|,-"
+        )
+
+        if (
+            candidate
+            and len(candidate) <= 120
+            and not re.fullmatch(r"[\d\W]+", candidate)
+        ):
+            counterparty = candidate
+            break
+
+    # Extract amount from explicitly currency-marked or labelled values.
+    amount = None
+    amount_patterns = [
+        r"(?:₹|Rs\.?|INR)\s*"
+        r"([0-9][0-9,]*(?:\.[0-9]{1,2})?)",
+        r"\bamount\b\s*[:\-]?\s*"
+        r"(?:₹|Rs\.?|INR)?\s*"
+        r"([0-9][0-9,]*(?:\.[0-9]{1,2})?)",
+    ]
+
+    amount_candidates = []
+
+    for pattern in amount_patterns:
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            try:
+                value = Decimal(match.group(1).replace(",", ""))
+
+                if Decimal("0") < value < Decimal("100000000"):
+                    amount_candidates.append(value)
+
+            except (InvalidOperation, ValueError):
+                continue
+
+    if amount_candidates:
+        amount = float(max(amount_candidates))
+
+    # Reuse the existing receipt date parser.
+    transaction_date = parse_receipt_date(text)
+
+    # Recognize a clock time when one is present.
+    transaction_time = None
+    time_match = re.search(
+        r"\b(0?[1-9]|1[0-2]|[01]?\d|2[0-3]):([0-5]\d)"
+        r"(?::([0-5]\d))?\s*(AM|PM)?\b",
+        text,
+        re.IGNORECASE,
+    )
+
+    if time_match:
+        hour = int(time_match.group(1))
+        minute = int(time_match.group(2))
+        second = int(time_match.group(3) or 0)
+        meridiem = (time_match.group(4) or "").upper()
+
+        if meridiem:
+            if not 1 <= hour <= 12:
+                time_match = None
+            else:
+                hour %= 12
+                if meridiem == "PM":
+                    hour += 12
+
+        if time_match:
+            transaction_time = (
+                f"{hour:02d}:{minute:02d}:{second:02d}"
+            )
+
+    # Extract a reference only from an explicitly labelled field.
+    transaction_reference = None
+
+    reference_pattern = (
+        r"\b(?:UPI\s*)?(?:transaction\s*(?:ID|reference|ref|number|no\.?)|"
+        r"reference\s*(?:ID|number|no\.?|code)?|"
+        r"ref\s*(?:ID|number|no\.?)?|UTR|RRN)\b"
+        r"\s*[:#\-]?\s*([A-Z0-9][A-Z0-9/\-]{5,})"
+    )
+
+    reference_match = re.search(
+        reference_pattern,
+        text,
+        re.IGNORECASE,
+    )
+
+    if reference_match:
+        candidate = reference_match.group(1).strip(" /-")
+
+        if not re.fullmatch(r"\d{4}", candidate):
+            transaction_reference = candidate
+
+    currency = parse_receipt_currency(text)
+
+    if currency is None and re.search(r"\bUPI\b", text, re.IGNORECASE):
+        currency = "INR"
+
+    # Warnings help the UI request a manual review.
+    if not platform:
+        warnings.append("Payment platform could not be identified.")
+
+    if not counterparty:
+        warnings.append("Transaction counterparty could not be identified.")
+
+    if amount is None:
+        warnings.append("Transaction amount could not be identified.")
+
+    if not transaction_date:
+        warnings.append("Transaction date could not be identified.")
+
+    if not transaction_reference:
+        warnings.append("Transaction reference could not be identified.")
+
+    if transaction_type is None:
+        warnings.append("Transaction direction could not be confirmed.")
+
+    if payment_status == "unknown":
+        warnings.append("Payment success could not be confirmed.")
+
+    if possible_self_transfer:
+        warnings.append(
+            "This may be a transfer between your own accounts. "
+            "Review it before saving an expense."
+        )
+
+    return {
+        "platform": platform,
+        "counterparty": counterparty,
+        "amount": amount,
+        "transaction_date": transaction_date,
+        "transaction_time": transaction_time,
+        "currency": currency or "INR",
+        "transaction_reference": transaction_reference,
+        "transaction_type": transaction_type,
+        "payment_status": payment_status,
+        "possible_self_transfer": possible_self_transfer,
+        "warnings": warnings,
+    }
+
+
+# ---------------------------------------------------------------------
 # COMBINED PARSING AND VALIDATION INSIGHTS
 # ---------------------------------------------------------------------
 
 def parse_receipt(text, filename=None):
-    """
-    Parse common receipt fields from extracted OCR text.
-
-    Returns merchant, date, total, currency, items and warnings.
-    """
+    """Parse common receipt fields from extracted OCR text."""
     text = text or ""
 
     merchant = parse_receipt_merchant(text, filename)
@@ -623,14 +846,10 @@ def parse_receipt(text, filename=None):
         )
 
     if not receipt_date:
-        warnings.append(
-            "Receipt date could not be identified."
-        )
+        warnings.append("Receipt date could not be identified.")
 
     if total_amount is None:
-        warnings.append(
-            "Receipt total could not be identified."
-        )
+        warnings.append("Receipt total could not be identified.")
 
     if not items:
         warnings.append(
@@ -653,11 +872,7 @@ def parse_receipt(text, filename=None):
 
 
 def make_receipt_insights(parsed):
-    """
-    Create approximate consistency checks for parsed receipt data.
-
-    OCR may miss items, taxes, discounts or other charges.
-    """
+    """Create approximate consistency checks for parsed receipt data."""
     parsed = parsed or {}
 
     items = parsed.get("items") or []
@@ -699,12 +914,7 @@ def process_receipt(
     ocr_language=None,
     tesseract_cmd=None,
 ):
-    """
-    Extract text and parse a receipt in one call.
-
-    This function does not save expenses or write to the database.
-    Those responsibilities remain with the application's backend.
-    """
+    """Extract text and parse a receipt in one call."""
     extracted_text = extract_receipt_text(
         filename=filename,
         content=content,
